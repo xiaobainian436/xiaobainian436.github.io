@@ -1,0 +1,1775 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>命运之岛 - Project Destiny ✨</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            /* 默认低饱和蓝色背景变量 */
+            --bg-c1: #1e293b;
+            --bg-c2: #334155;
+            --bg-c3: #2c3e50;
+            --bg-c4: #1a202c;
+            --step0-grad: linear-gradient(to bottom, #020617, #0f172a);
+        }
+
+        @keyframes spin-reverse { from { transform: rotate(360deg); } to { transform: rotate(0deg); } }
+        .animate-spin-reverse { animation: spin-reverse 1.5s linear infinite; }
+        @keyframes float-large { 0%, 100% { transform: translateY(0px) rotate(0deg); } 50% { transform: translateY(-30px) rotate(1deg); } }
+        .animate-float-large { animation: float-large 8s ease-in-out infinite; }
+        
+        @keyframes flare-breathe {
+            0%, 100% { opacity: 0.3; transform: scale(1); filter: blur(40px); }
+            50% { opacity: 0.6; transform: scale(1.2); filter: blur(60px); }
+        }
+        .animate-flare { animation: flare-breathe 4s ease-in-out infinite; }
+
+        @keyframes mesh-motion {
+            0% { background-position: 0% 50%, 50% 0%, 100% 50%, 50% 100%; }
+            50% { background-position: 100% 50%, 50% 100%, 0% 50%, 50% 0%; }
+            100% { background-position: 0% 50%, 50% 0%, 100% 50%, 50% 100%; }
+        }
+
+        #init-white-mask {
+            position: fixed; inset: 0; background: #fff; z-index: 1000;
+            pointer-events: none; transition: opacity 2.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        #hourglass-overlay {
+            position: fixed; inset: 0; background: #fff; z-index: 1001;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            opacity: 0; 
+            transition: opacity 2s ease, filter 1.5s ease;
+        }
+        .hourglass-svg { width: 100px; height: 140px; filter: drop-shadow(0 0 15px rgba(30, 58, 138, 0.2)); }
+        .hg-frame { fill: none; stroke: #1e3a8a; stroke-width: 1.5; stroke-linecap: round; }
+        .hg-water { fill: #2563eb; }
+        
+        @keyframes water-drop {
+            0% { stroke-dashoffset: 40; opacity: 0; }
+            30% { opacity: 1; }
+            100% { stroke-dashoffset: 0; opacity: 0.7; }
+        }
+        .hg-stream {
+            stroke: #2563eb; stroke-width: 2.5; stroke-dasharray: 4, 10;
+            animation: water-drop 0.45s linear infinite;
+        }
+
+        body { 
+            background-color: #0f172a;
+            color: white; 
+            overflow-x: hidden; 
+            font-family: system-ui, -apple-system, sans-serif; 
+            margin: 0; padding: 0; min-height: 100vh;
+        }
+
+        #bg-canvas, #bg-final, #step0-bg, #deconstructed-bg-canvas { position: fixed; inset: 0; pointer-events: none; }
+        #bg-canvas {
+            z-index: -3;
+            background-image: 
+                radial-gradient(circle at 20% 30%, var(--bg-c1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, var(--bg-c2) 0%, transparent 50%),
+                radial-gradient(circle at 40% 80%, var(--bg-c3) 0%, transparent 60%),
+                radial-gradient(circle at 90% 90%, var(--bg-c4) 0%, transparent 40%);
+            background-size: 200% 200%;
+            animation: mesh-motion 25s ease-in-out infinite;
+            transition: opacity 1.8s ease-in-out, background-image 2.5s ease-in-out;
+        }
+        #bg-final {
+            z-index: -1;
+            opacity: 0;
+            transition: opacity 2.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        #deconstructed-bg-canvas {
+            z-index: -1.5;
+            opacity: 0;
+            transition: opacity 3s cubic-bezier(0.4, 0, 0.2, 1);
+            filter: blur(15px); 
+        }
+
+        #step0-bg {
+            z-index: -2;
+            opacity: 0;
+            transition: opacity 3s cubic-bezier(0.4, 0, 0.2, 1), background 2.5s ease-in-out;
+            background: var(--step0-grad);
+            overflow: hidden;
+        }
+        #step0-bg.show-bg { opacity: 1; }
+        .aurora {
+            position: absolute; top: -20%; left: -10%; width: 120%; height: 60%;
+            background: radial-gradient(ellipse at 50% 50%, rgba(13, 148, 136, 0.15) 0%, transparent 70%);
+            filter: blur(60px); opacity: 0.5; animation: aurora-move 20s infinite alternate;
+        }
+        @keyframes aurora-move { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(5%, 10%) scale(1.1); } }
+        .film-grain {
+            position: absolute; inset: 0; opacity: 0.04; pointer-events: none;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+        .breathing-glow { animation: glow-breathe 4s ease-in-out infinite; }
+        @keyframes glow-breathe { 0%, 100% { opacity: 0.3; filter: brightness(1); } 50% { opacity: 0.6; filter: brightness(1.5); } }
+
+        .step-container { 
+            display: none; 
+            opacity: 0; 
+            filter: blur(30px); 
+            width: 100%; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center;
+            transition: opacity 2s cubic-bezier(0.2, 0.8, 0.2, 1), 
+                        filter 2s cubic-bezier(0.2, 0.8, 0.2, 1), 
+                        transform 2s cubic-bezier(0.2, 0.8, 0.2, 1);
+            transform: scale(0.96); 
+            position: relative;
+            z-index: 10;
+            will-change: opacity, filter, transform;
+        }
+        .step-container.active { 
+            display: flex; 
+            opacity: 1; 
+            filter: blur(0px); 
+            transform: scale(1); 
+        }
+        
+        .reveal-anim { transition: opacity 4s cubic-bezier(0.4, 0, 0.2, 1), filter 4s cubic-bezier(0.4, 0, 0.2, 1) !important; }
+
+        #ripple-container { position: fixed; inset: 0; z-index: 500; pointer-events: none; }
+        @keyframes ripple-out {
+            0% { transform: translate(-50%, -50%) scale(0); opacity: 0; filter: blur(15px); border-width: 20px; }
+            20% { opacity: 0.34; filter: blur(2px); }
+            60% { opacity: 0.18; filter: blur(4px); }
+            100% { transform: translate(-50%, -50%) scale(6.5); opacity: 0; filter: blur(15px); border-width: 1px; }
+        }
+        @keyframes ripple-in {
+            0% { transform: translate(-50%, -50%) scale(6.5); opacity: 0; filter: blur(15px); border-width: 1px; }
+            40% { opacity: 0.34; filter: blur(2px); }
+            80% { opacity: 0.18; filter: blur(4px); }
+            100% { transform: translate(-50%, -50%) scale(0); opacity: 0; filter: blur(15px); border-width: 20px; }
+        }
+        .ripple { position: absolute; top: 50%; left: 50%; border-radius: 50%; border-style: solid; border-color: rgba(255, 255, 255, 0.34); transform-origin: center center; }
+
+        #bubble-container { position: fixed; inset: 0; z-index: 5; pointer-events: none; overflow: hidden; }
+        .bubble {
+            position: absolute; bottom: -150px;
+            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0.02) 70%);
+            box-shadow: inset -3px -3px 8px rgba(255,255,255,0.15), 0 0 15px rgba(255,255,255,0.08);
+            border-radius: 50%; pointer-events: none; will-change: transform, opacity;
+            backdrop-filter: blur(2px);
+        }
+        @keyframes bubble-rise {
+            0% { transform: translateY(0) translateX(0); opacity: 0; }
+            15% { opacity: 0.8; }
+            85% { opacity: 0.6; }
+            100% { transform: translateY(-135vh) translateX(var(--sway, 0)); opacity: 0; }
+        }
+
+        .back-btn, #music-toggle {
+            position: fixed; top: 32px; z-index: 110;
+            width: 52px; height: 52px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.15);
+            backdrop-filter: blur(15px); color: inherit;
+            transition: all 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+            cursor: pointer;
+        }
+        .back-btn { left: 32px; }
+        #music-toggle { right: 32px; opacity: 0; pointer-events: none; }
+        #music-toggle.visible { opacity: 1; pointer-events: auto; }
+        
+        .back-btn svg, #music-toggle svg { width: 22px; height: 22px; pointer-events: none; }
+        .back-btn:hover, #music-toggle:hover { background: white; color: #0f172a; transform: scale(1.1); box-shadow: 0 0 25px rgba(255,255,255,0.2); }
+        
+        body.light-mode { color: #1e293b !important; }
+        body.light-mode .back-btn, body.light-mode #music-toggle { background: rgba(0,0,0,0.05); border-color: rgba(0,0,0,0.1); color: #1e293b; }
+        body.light-mode .back-btn:hover, body.light-mode #music-toggle:hover { background: #1e293b; color: #fff; }
+
+        #loading-overlay { z-index: 200; pointer-events: none; }
+        
+        .circle-title-group { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 100; text-align: center; pointer-events: none; width: 100%; }
+        #altar-ring { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 700px; height: 700px; pointer-events: none; }
+        #altar-ring > div { pointer-events: auto; }
+        .orbital-line { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); border: 0.5px solid rgba(255,255,255,0.1); border-radius: 50%; pointer-events: none; }
+
+        #error-modal {
+            position: fixed; top: 20px; right: 20px; z-index: 1000;
+            background: #fee2e2; border-left: 4px solid #ef4444; color: #b91c1c;
+            padding: 16px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transform: translateX(120%); transition: transform 0.5s ease;
+        }
+        #error-modal.show { transform: translateX(0); }
+
+        #progress-bar { top: 58px; }
+        .progress-dot {
+            height: 2px; width: 44px; background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 999px; transition: all 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transform-origin: center;
+        }
+        .progress-dot.active { background-color: rgba(255, 255, 255, 1); box-shadow: 0 0 12px rgba(255, 255, 255, 0.6); transform: scale(1.1, 2.2); }
+        .progress-dot.completed { background-color: rgba(255, 255, 255, 0.45); }
+        body.light-mode .progress-dot { background-color: rgba(0, 0, 0, 0.05); }
+        body.light-mode .progress-dot.active { background-color: rgba(0, 0, 0, 0.9); box-shadow: 0 0 8px rgba(0, 0, 0, 0.1); }
+        body.light-mode .progress-dot.completed { background-color: rgba(0, 0, 0, 0.2); }
+
+        .token-slot {
+            width: 140px; height: 140px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.02); transition: all 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            position: relative; cursor: pointer;
+        }
+        .token-slot:hover { 
+            border-color: rgba(255,255,255,0.8); 
+            background: rgba(255,255,255,0.1); 
+            transform: scale(1.12) translateY(-6px); 
+            box-shadow: 0 15px 50px rgba(0,0,0,0.4), 0 0 30px rgba(255,255,255,0.15);
+            filter: brightness(1.15);
+        }
+        
+        .token-slot.active { background: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.8); box-shadow: 0 0 35px rgba(255,255,255,0.2); }
+        .token-slot.active .main-icon { display: none; } 
+        .token-slot.active .slot-label { 
+            font-size: 14px; color: #fff; font-weight: 500; transform: scale(1.2); 
+            text-shadow: 0 0 15px rgba(255,255,255,0.9); opacity: 1;
+        }
+
+        .token-slot .close-btn { 
+            position: absolute; top: 10px; right: 10px; width: 26px; height: 26px; 
+            background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.15); 
+            border-radius: 50%; display: none; align-items: center; justify-content: center; 
+            transition: all 0.3s ease; z-index: 30; backdrop-filter: blur(4px);
+        }
+        .token-slot .close-btn:hover { background: rgba(239, 68, 68, 0.8); transform: scale(1.1); border-color: transparent; }
+        .token-slot.active .close-btn { display: flex; }
+        
+        .token-slot .slot-label { transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); pointer-events: none; }
+        .token-slot:hover .slot-label { transform: scale(1.15); color: rgba(255, 255, 255, 0.85); text-shadow: 0 0 12px rgba(255, 255, 255, 0.4); font-weight: 500; }
+        .token-slot:hover .main-icon { color: rgba(255, 255, 255, 0.4); filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.2)); }
+        
+        #proceed-trigger { opacity: 0.2; pointer-events: none; transition: all 0.8s; }
+        #proceed-trigger.ready { opacity: 1; pointer-events: auto; transform: translateY(0); }
+
+        .media-layer { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: opacity 2s ease-in-out; pointer-events: none; }
+
+        /* 镌刻菜单 - 优化缩小不露怯 */
+        #topology-menu {
+            position: fixed;
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 28px;
+            padding: 14px;
+            display: none;
+            flex-direction: column;
+            gap: 12px;
+            z-index: 10000;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.7), inset 0 0 0 1px rgba(255,255,255,0.1);
+            transform: translate(-50%, -100%);
+            animation: menu-pop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            min-width: 230px;
+        }
+        
+        @keyframes menu-pop { from { opacity: 0; scale: 0.6; } to { opacity: 1; scale: 1; } }
+        @keyframes menu-hide { from { opacity: 1; scale: 1; } to { opacity: 0; scale: 0.4; } }
+        .menu-hiding { animation: menu-hide 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards !important; }
+
+        .menu-icons-row { display: flex; gap: 8px; justify-content: center; }
+        .menu-item {
+            width: 42px; height: 42px; border-radius: 12px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            cursor: pointer; transition: all 0.3s; color: rgba(255,255,255,0.4);
+            position: relative; border: 1px solid transparent;
+        }
+        .menu-item svg { width: 20px; height: 20px; transition: transform 0.3s; }
+        .menu-item:hover, .menu-item.selected { 
+            background: rgba(255, 255, 255, 0.15); 
+            color: white; 
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-3px); 
+        }
+        .menu-item .label { 
+            position: absolute; bottom: -20px; font-size: 9px;
+            white-space: nowrap; opacity: 0; transition: opacity 0.3s;
+            letter-spacing: 0.05em; font-weight: 300; font-style: italic;
+        }
+        .menu-item:hover .label { opacity: 1; }
+
+        #topology-input-area { display: none; flex-direction: column; gap: 10px; padding: 8px; border-top: 1px solid rgba(255,255,255,0.1); margin-top: 8px; }
+        #topology-input-area p { font-size: 10px; color: rgba(255,255,255,0.6); font-style: italic; line-height: 1.6; text-align: center; }
+        #topology-input-field { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.2); border-radius: 10px; padding: 10px; color: white; font-size: 12px; outline: none; transition: all 0.3s; text-align: center; }
+        #topology-confirm-btn { background: white; color: #0f172a; border-radius: 12px; padding: 10px; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.2em; cursor: pointer; transition: all 0.3s; text-align: center; }
+
+        /* 拓扑节点样式 */
+        .topology-node-group { cursor: grab; pointer-events: auto; }
+        .topology-node-group:active { cursor: grabbing; }
+        .topology-label-text { 
+            pointer-events: none; 
+            font-size: 8.5px;
+            font-weight: 300; 
+            font-style: italic; 
+            fill: rgba(255,255,255,0.5); 
+            text-anchor: middle; 
+            transition: all 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+        .topology-node-group:hover .topology-label-text { fill: rgba(255,255,255,1); font-size: 11px; filter: brightness(1.5); }
+        .topology-node-group:hover .topology-node { filter: brightness(1.8); }
+
+        /* 特殊转场：纸条界面 */
+        #note-transition-overlay {
+            position: fixed; inset: 0; z-index: 50000;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(0px);
+            display: none; align-items: center; justify-content: center;
+            opacity: 0; transition: all 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        #destiny-note {
+            background: #fffef0; color: #1e293b;
+            padding: 50px; border-radius: 2px; width: 380px;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.5);
+            transform: rotate(-1.5deg); position: relative;
+            font-family: "Noto Serif SC", serif; font-style: italic; text-align: center; line-height: 2;
+            opacity: 1; transition: all 2s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
+        }
+        #note-content { font-size: 1.25rem; color: #334155; margin-bottom: 20px; font-weight: 500; }
+        
+        /* 几何形海浪样式 */
+        #wave-layers-container { position: absolute; inset: 0; pointer-events: none; z-index: 200; display: flex; flex-direction: column; justify-content: flex-end; overflow: hidden; }
+        .wave-layer {
+            position: absolute; bottom: 0; left: -10%; width: 120%; height: 100%;
+            transform: translateY(100%); transition: transform 2.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .wave-layer.active { transform: translateY(0); }
+        .wave-layer svg { width: 100%; height: auto; transform: scaleY(1.5); transform-origin: bottom; }
+        .wave-fill { width: 100%; height: 100vh; margin-top: -1px; }
+
+        /* 祭坛蓄力样式 */
+        .altar-item { 
+            transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1.2), filter 0.4s ease;
+            user-select: none;
+            -webkit-user-drag: none;
+            cursor: pointer;
+        }
+        .altar-item .icon-box {
+            position: relative;
+            width: 6rem; height: 6rem;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 2.5rem;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.5s ease;
+            overflow: hidden;
+        }
+        .altar-item:hover .icon-box {
+            background: rgba(255,255,255,0.12);
+            border-color: rgba(255,255,255,0.5);
+            filter: brightness(1.2) drop-shadow(0 0 15px rgba(255,255,255,0.2));
+        }
+        .charge-fill {
+            position: absolute;
+            bottom: 0; left: 0; width: 100%; height: 0%;
+            background: rgba(255, 255, 255, 0.95);
+            transition: height 0.1s linear;
+            pointer-events: none;
+            z-index: 1;
+        }
+        .altar-item.fully-charged .icon-box {
+            background: white !important;
+            box-shadow: 0 0 50px white;
+        }
+        .altar-item.fully-charged span {
+            color: #0f172a !important;
+            z-index: 5;
+        }
+        .altar-item span {
+            position: relative;
+            z-index: 2;
+            transition: color 0.3s ease;
+        }
+        
+        /* 蓄力粒子 */
+        .charge-particle {
+            position: fixed;
+            width: 4px; height: 4px;
+            background: white;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        /* 标题引导语 */
+        .destiny-prompt {
+            font-size: 11px;
+            letter-spacing: 0.2em;
+            color: rgba(255, 255, 255, 0.4);
+            margin-top: 0.75rem;
+            font-style: italic;
+            font-weight: 300;
+        }
+
+        #altar-confirm-btn {
+            position: absolute;
+            bottom: -30px; /* 位置回归上一版本 */
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0.25; /* 默认可见但半透明 */
+            transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.4s ease;
+            pointer-events: none;
+            cursor: pointer;
+            will-change: transform, opacity, bottom;
+        }
+        #altar-confirm-btn.ready {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateX(-50%) scale(1.05);
+            box-shadow: 0 10px 40px rgba(255,255,255,0.15);
+        }
+
+        /* 粒子星星 */
+        .memory-particle {
+            position: fixed;
+            width: 4px; height: 4px;
+            background: white;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 60000;
+            filter: drop-shadow(0 0 6px white);
+        }
+    </style>
+</head>
+<body id="main-body">
+
+    <div id="error-modal" onclick="this.classList.remove('show')">
+        <strong class="block text-sm">提示</strong>
+        <span id="error-text" class="text-[10px] opacity-80"></span>
+    </div>
+
+    <div id="bubble-container"></div>
+
+    <div id="hourglass-overlay">
+        <svg class="hourglass-svg" viewBox="0 0 100 140">
+            <path class="hg-frame" d="M20,10 L80,10 M20,130 L80,130 M30,10 Q50,70 30,130 M70,10 Q50,70 70,130"></path> 
+            <g clip-path="url(#clip-top-natural)">
+                <path class="hg-water" d="M30,10 Q50,70 70,10 Z"></path>
+            </g>
+            <g clip-path="url(#clip-bottom-natural)">
+                <path class="hg-water" d="M30,130 Q50,70 70,130 Z"></path>
+            </g>
+            <line class="hg-stream" x1="50" y1="68" x2="50" y2="128"></line> 
+            <defs>
+                <clipPath id="clip-top-natural">
+                    <rect x="0" y="10" width="100" height="60">
+                        <animate attributeName="y" from="10" to="70" dur="4s" fill="freeze" />
+                        <animate attributeName="height" from="60" to="0" dur="4s" fill="freeze" />
+                    </rect>
+                </clipPath>
+                <clipPath id="clip-bottom-natural">
+                    <rect x="0" y="130" width="100" height="0">
+                        <animate attributeName="y" from="130" to="70" dur="4s" fill="freeze" />
+                        <animate attributeName="height" from="0" to="60" dur="4s" fill="freeze" />
+                    </rect>
+                </clipPath>
+            </defs>
+        </svg>
+        <p class="mt-10 text-[9px] tracking-[1em] uppercase font-light text-blue-900 animate-pulse">Wait for Origin</p>
+    </div>
+
+    <div id="init-white-mask"></div>
+
+    <div id="step0-bg">
+        <div class="aurora"></div>
+        <svg class="absolute inset-0 w-full h-full" preserveAspectRatio="xMidYMid slice" viewBox="0 0 1000 600">
+            <g id="stars-group"></g>
+            <path d="M0,450 L150,380 L300,420 L500,350 L700,400 L850,320 L1000,400 L1000,600 L0,600 Z" fill="#0f172a" opacity="0.4" />
+            <path d="M0,480 L200,420 L400,460 L600,380 L800,440 L1000,400 L1000,600 L0,600 Z" fill="#1e293b" opacity="0.6" />
+            <path d="M0,520 L250,460 L500,500 L750,440 L1000,500 L1000,600 L0,600 Z" fill="#020617" />
+            <g fill="#020617">
+                <path d="M100,520 L115,460 L130,520 Z" /> <path d="M110,480 L120,440 L130,480 Z" />
+                <path d="M850,510 L865,440 L880,510 Z" /> <path d="M860,460 L870,420 L880,460 Z" />
+                <path d="M420,500 Q425,490 435,490 L445,490 Q450,490 450,500 L448,510 L442,510 Z M445,490 Q450,480 445,470" stroke="#020617" stroke-width="2" fill="none" />
+            </g>
+            <path d="M500,600 C450,580 550,565 500,540 S560,515 525,485" fill="none" stroke="url(#roadGradient)" stroke-width="4" stroke-dasharray="2,6" />
+            <path d="M500,600 C450,580 550,565 500,540 S560,515 525,485" fill="none" stroke="#60a5fa" stroke-width="2" opacity="0.3" class="breathing-glow" />
+            <circle cx="525" cy="485" r="4" fill="#60a5fa" class="breathing-glow">
+                <animate attributeName="r" values="4;8;4" dur="3s" repeatCount="indefinite" />
+            </circle>
+            <defs>
+                <linearGradient id="roadGradient" x1="0" y1="1" x2="0" y2="0">
+                    <stop offset="0%" stop-color="#60a5fa" stop-opacity="0.9" />
+                    <stop offset="60%" stop-color="#60a5fa" stop-opacity="0.4" />
+                    <stop offset="100%" stop-color="#334155" stop-opacity="0" />
+                </linearGradient>
+            </defs>
+        </svg>
+        <div class="film-grain"></div>
+    </div>
+
+    <div id="bg-canvas"></div>
+    <div id="bg-final"></div>
+    <canvas id="deconstructed-bg-canvas"></canvas>
+
+    <button id="global-back" onclick="goBack()" class="back-btn hidden">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
+            <path d="M19 12H5M12 19l-7-7 7-7"></path>
+        </svg>
+    </button>
+
+    <div id="music-toggle" onclick="toggleMusic()">
+        <svg id="music-icon-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H2v6h4l5 4V5z"></path><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path></svg>
+        <svg id="music-icon-off" class="hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H2v6h4l5 4V5z"></path><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>
+    </div>
+
+    <div id="ripple-container"></div>
+
+    <div id="progress-bar" class="fixed left-1/2 -translate-x-1/2 flex gap-4 z-50 transition-opacity duration-1000">
+        <div class="progress-dot" id="dot-0"></div><div class="progress-dot" id="dot-1"></div>
+        <div class="progress-dot" id="dot-2"></div><div class="progress-dot" id="dot-3"></div>
+    </div>
+
+    <div id="loading-overlay" class="fixed inset-0 hidden flex flex-col items-center justify-center bg-slate-950/90 backdrop-blur-2xl">
+        <div class="absolute w-64 h-64 bg-blue-500/10 rounded-full animate-flare"></div>
+        <div class="relative w-32 h-32 flex items-center justify-center">
+            <div class="absolute inset-0 border-[0.5px] border-white/10 rounded-full animate-[spin_10s_linear_infinite]"></div>
+            <div class="absolute inset-2 border-t-[1.5px] border-blue-400/80 rounded-full animate-[spin_1.5s_cubic-bezier(0.4,0,0.2,1)_infinite]" style="filter: drop-shadow(0 0 15px rgba(96, 165, 250, 0.6));"></div>
+            <div class="absolute inset-2 border-r-[0.5px] border-white/20 rounded-full animate-[spin_3s_linear_infinite]"></div>
+            <div class="absolute w-1 h-1 bg-white rounded-full shadow-[0_0_20px_4px_rgba(255,255,255,0.8)] animate-pulse"></div>
+            <svg class="w-7 h-7 text-white/90 animate-pulse relative z-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+                <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"></path>
+            </svg>
+        </div>
+        <p id="loading-text" class="mt-8 text-[9px] tracking-[1.5em] uppercase font-light text-blue-300/50">Resonating</p>
+    </div>
+
+    <!-- 转场副本界面 -->
+    <div id="note-transition-overlay">
+        <!-- 海浪层容器 -->
+        <div id="wave-layers-container"></div>
+        
+        <div id="destiny-note">
+            <p id="note-content"></p>
+            <div class="mt-12 flex flex-col gap-5">
+                <button onclick="washMemory()" class="px-10 py-4 border border-slate-500 text-slate-600 rounded-full text-[10px] tracking-[0.2em] uppercase hover:bg-slate-50 transition-all font-light">让海水冲刷</button>
+                <button onclick="lightMemory()" class="px-10 py-4 bg-slate-900 text-white rounded-full text-[10px] tracking-[0.3em] uppercase shadow-2xl hover:scale-105 transition-all font-bold">点亮记忆</button>
+            </div>
+        </div>
+    </div>
+
+    <main class="relative flex flex-col items-center justify-center min-h-screen">
+        <div id="topology-menu">
+            <div class="menu-icons-row">
+                <div class="menu-item" onclick="prepareDestinyNode('circle')">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="8"/></svg>
+                    <span class="label">陪伴</span>
+                </div>
+                <div class="menu-item" onclick="prepareDestinyNode('star')">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                    <span class="label">启发</span>
+                </div>
+                <div class="menu-item" onclick="prepareDestinyNode('triangle')">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 4l9 16H3z"/></svg>
+                    <span class="label">激励</span>
+                </div>
+                <div class="menu-item" onclick="prepareDestinyNode('quad')">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>
+                    <span class="label">治愈</span>
+                </div>
+                <div class="menu-item" onclick="prepareDestinyNode('harm')">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21L3 4h18z"/></svg>
+                    <span class="label">伤害</span>
+                </div>
+                <div class="menu-item" onclick="prepareDestinyNode('custom')">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L4 12l8 10 8-10z"/></svg>
+                    <span class="label">自定义</span>
+                </div>
+            </div>
+            <div id="topology-input-area">
+                <p id="topology-input-prompt"></p>
+                <input type="text" id="topology-input-field" placeholder="镌刻你的痕迹..." maxlength="20">
+                <div id="topology-confirm-btn" onclick="finalizeDestinyNode()">确认逻辑</div>
+            </div>
+        </div>
+
+        <div id="step-0" class="step-container flex-col items-center space-y-12">
+            <div class="text-center space-y-4">
+                <h1 class="text-5xl font-extralight tracking-[0.4em] uppercase">地质溯源</h1>
+                <p class="text-white/40 text-[10px] tracking-[0.6em] uppercase italic">Genesis of Consciousness</p>
+            </div>
+            <div class="flex gap-8">
+                <div id="slot-0" class="token-slot group" onclick="triggerUpload(0)">
+                    <div class="close-btn" onclick="clearSlot(event, 0)">
+                        <svg class="w-3.5 h-3.5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 18l12-12"></path></svg>
+                    </div>
+                    <svg class="main-icon w-8 h-8 text-white/10 mb-2 transition-colors duration-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M12 2v20M2 12h20"></path></svg>
+                    <span class="text-[9px] tracking-[0.2em] text-white/20 uppercase pl-[0.2em] slot-label">投放生命信物</span>
+                    <input type="file" id="upload-0" class="hidden" onchange="handleFileChange(0)">
+                </div>
+                <div id="slot-1" class="token-slot group" onclick="triggerUpload(1)">
+                    <div class="close-btn" onclick="clearSlot(event, 1)">
+                        <svg class="w-3.5 h-3.5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 18l12-12"></path></svg>
+                    </div>
+                    <svg class="main-icon w-8 h-8 text-white/10 mb-2 transition-colors duration-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M12 2v20M2 12h20"></path></svg>
+                    <span class="text-[9px] tracking-[0.2em] text-white/20 uppercase pl-[0.2em] slot-label">投放生命信物</span>
+                    <input type="file" id="upload-1" class="hidden" onchange="handleFileChange(1)">
+                </div>
+                <div id="slot-2" class="token-slot group" onclick="triggerUpload(2)">
+                    <div class="close-btn" onclick="clearSlot(event, 2)">
+                        <svg class="w-3.5 h-3.5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 18l12-12"></path></svg>
+                    </div>
+                    <svg class="main-icon w-8 h-8 text-white/10 mb-2 transition-colors duration-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M12 2v20M2 12h20"></path></svg>
+                    <span class="text-[9px] tracking-[0.2em] text-white/20 uppercase pl-[0.2em] slot-label">投放生命信物</span>
+                    <input type="file" id="upload-2" class="hidden" onchange="handleFileChange(2)">
+                </div>
+            </div>
+            <div id="proceed-trigger" onclick="processStep(0)" class="flex flex-col items-center cursor-pointer group translate-y-4">
+                <div class="w-20 h-20 border border-white/20 rounded-full flex items-center justify-center bg-white/[0.05] group-hover:scale-110 transition-all duration-500 shadow-xl group-hover:bg-white group-hover:border-white">
+                    <svg class="w-8 h-8 text-white/40 group-hover:text-slate-900 transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M5 12h14M12 5l7 7-7 7"></path>
+                    </svg>
+                </div>
+                <span class="mt-4 text-[10px] tracking-[0.6em] text-white/30 uppercase pl-[0.6em] font-light group-hover:text-white transition-colors">开启仪式</span>
+            </div>
+        </div>
+
+        <div id="step-1" class="step-container flex-col items-center space-y-16">
+            <h2 class="text-4xl font-extralight tracking-[0.4em] uppercase">气候仪式</h2>
+            <div class="w-[520px] space-y-12">
+                <p id="climate-question" class="text-white/60 text-sm text-center font-light italic leading-relaxed h-12"></p>
+                <div id="climate-options" class="grid grid-cols-1 gap-5"></div>
+            </div>
+        </div>
+
+        <div id="step-2" class="step-container flex-col items-center space-y-16">
+            <h2 class="text-4xl font-extralight tracking-[0.4em] uppercase text-white/80">人生地形</h2>
+            <div class="relative w-[520px] h-[520px] border border-white/10 rounded-[5rem] bg-white/[0.02] shadow-2xl" id="topology-box" style="overflow: visible;">
+                <div id="topology-hint" class="absolute inset-0 flex flex-col items-center justify-center space-y-4 opacity-40">
+                    <svg class="w-12 h-12 text-white/30 animate-pulse" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M12 2v20M2 12h20"></path></svg>
+                    <p class="text-[10px] tracking-[0.4em] uppercase font-light">点击空白区域，描绘你的命运轨迹</p>
+                </div>
+                <svg id="topology-svg" class="absolute inset-0 w-full h-full opacity-60 pointer-events-auto"></svg>
+            </div>
+            <button id="topo-activate-btn" onclick="triggerStep2Process()" class="px-20 py-5 bg-white/5 border border-white/10 text-white/20 rounded-full text-[10px] tracking-[0.8em] font-bold uppercase transition-all shadow-xl pointer-events-none">激活逻辑地形</button>
+        </div>
+
+        <div id="step-3" class="step-container w-full h-screen flex-col items-center justify-center bg-transparent overflow-hidden" onmousemove="handleJellyFollow(event)">
+            <div class="relative w-[700px] h-[700px]">
+                <div class="orbital-line w-[620px] h-[620px]"></div><div class="orbital-line w-[480px] h-[480px] opacity-50"></div>
+                <div class="circle-title-group">
+                    <h2 class="text-5xl font-extralight tracking-[0.5em] uppercase text-white">命运之环</h2>
+                    <p class="destiny-prompt italic">“赋予心仪的属性以能量”</p>
+                    <p class="text-[10px] tracking-[1.2em] text-white/20 mt-6 uppercase font-thin">Circle of Destiny</p>
+                </div>
+                <div id="altar-ring"></div>
+                <button id="altar-confirm-btn" onclick="confirmAltarValues()" class="px-14 py-4 bg-white text-slate-900 rounded-full text-[11px] tracking-[0.5em] font-bold uppercase transition-all shadow-2xl">确认重启命运值</button>
+            </div>
+        </div>
+
+        <div id="step-4" class="step-container w-full max-w-7xl flex-col items-center justify-center min-h-screen py-24 reveal-anim">
+            <div class="absolute top-12 left-12 flex items-center gap-6 opacity-30"><div class="w-20 h-[1px] bg-current"></div><span class="text-[11px] tracking-[0.6em] uppercase font-bold text-current">Life Island // Project Destiny</span></div>
+            <div class="grid grid-cols-1 lg:grid-cols-12 w-full items-center gap-20 px-12 relative z-10 -translate-y-12">
+                <div class="lg:col-span-4 lg:text-left text-center space-y-10">
+                    <div class="space-y-4">
+                        <p id="island-theme-label" class="opacity-40 text-[12px] tracking-[0.5em] uppercase font-light"></p>
+                        <h2 id="island-name" class="text-7xl font-extralight tracking-tighter leading-[1.1] italic">...</h2>
+                    </div>
+                    <div class="space-y-6">
+                        <p id="island-desc" class="opacity-70 font-light text-base leading-relaxed italic max-w-sm"></p>
+                    </div>
+                    <div class="flex flex-col gap-6 text-[11px] tracking-[0.3em] opacity-40 font-mono"><div>COORD <span id="island-coord">SCANNING...</span></div><div>SPIRIT <span id="island-spirit">SLEEPING...</span></div></div>
+                </div>
+                <div class="lg:col-span-8 relative flex flex-col items-center justify-center min-h-[750px]">
+                    <div id="visual-frame" class="relative group w-full flex justify-center items-center h-[550px]">
+                        <div id="reified-image" class="absolute inset-0 z-20 rounded-full overflow-hidden opacity-0 transition-opacity duration-[2s] border-[12px] border-white shadow-2xl scale-[1.05]"></div>
+                        <div id="island-visual" class="relative z-10 scale-[1.1] animate-float-large transition-all duration-[2.5s]"></div>
+                    </div>
+                    <div id="result-controls" class="flex flex-wrap justify-center gap-8 pt-40 z-20">
+                        <button onclick="reset()" class="px-14 py-5 border border-black/10 rounded-full text-black/40 hover:text-black transition-all text-[11px] tracking-[0.5em] uppercase font-bold">RESTART</button>
+                        <button id="reify-btn" onclick="reifyStageOne()" class="px-20 py-5 bg-slate-900 text-white rounded-full text-[11px] tracking-[0.5em] uppercase font-bold shadow-2xl hover:scale-110 transition-all">✨ 具象化画卷</button>
+                        <button id="stereo-btn" onclick="reifyStageTwo()" class="hidden px-20 py-5 bg-blue-600 text-white rounded-full text-[11px] tracking-[0.5em] uppercase font-bold shadow-2xl hover:scale-110 transition-all">🌀 立体化画卷</button>
+                        <button id="cancel-stereo-btn" onclick="reifyStageOne(true)" class="hidden px-20 py-5 border-2 border-slate-900 text-slate-900 rounded-full text-[11px] tracking-[0.5em] uppercase font-bold hover:bg-slate-900 hover:text-white transition-all">🔙 取消立体化</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const islandTypes = [
+            { id: 'ember_island', name: '烬土炎洲', theme: 'warm', themeName: '黄红：炽烈与绚烂', color: '#ef4444', sec: '#7f1d1d', icon: '🌋', desc: '岛屿遍布冷却的熔岩焦土，沟壑中流淌着炽热的熔岩河，是火焰与重生的国度。', image: 'https://cdn.jsdelivr.net/gh/xiaobainian436/xiaobainian436.github.io@main/jintuyanzhou.png', video: 'https://cdn.jsdelivr.net/gh/xiaobainian436/xiaobainian436.github.io@main/jintuyanzhou.mp4' },
+            { id: 'maple_cliff', name: '赤枫暮崖', theme: 'warm', themeName: '黄红：炽烈与绚烂', color: '#f97316', sec: '#7c2d12', icon: '🍁', desc: '高耸的悬崖上生满如火焰般的枫林，每当暮色降临，枫叶、晚霞与熔岩的微光交融，天地一片赤红。', image: 'https://cdn.jsdelivr.net/gh/xiaobainian436/xiaobainian436.github.io@main/chifengmuya.png', video: 'https://cdn.jsdelivr.net/gh/xiaobainian436/xiaobainian436.github.io@main/chifengmuya.mp4' },
+            { id: 'violet_valley', name: '紫汐灵谷', theme: 'mystic', themeName: '粉紫：梦幻与幽秘', color: '#ec4899', sec: '#831843', icon: '🌸', desc: '花朵的色泽会如潮汐般在粉紫间每日规律变化，形成柔和的“色彩潮汐”，充满灵动的生命力。', image: 'https://cdn.jsdelivr.net/gh/xiaobainian436/xiaobainian436.github.io@main/zixilinggu.png', video: 'https://cdn.jsdelivr.net/gh/xiaobainian436/xiaobainian436.github.io@main/zixilinggu.mp4' },
+            { id: 'starry_field', name: '幽昙星原', theme: 'mystic', themeName: '粉紫：梦幻与幽秘', color: '#a855f7', sec: '#581c87', icon: '✨', desc: '一种如玉昙般的巨大花朵在夜晚集体绽放，散发出星辉般的淡紫光芒，将草原点缀成星空倒影。', image: 'https://cdn.jsdelivr.net/gh/xiaobainian436/xiaobainian436.github.io@main/youtanxingyuan.png', video: 'https://cdn.jsdelivr.net/gh/xiaobainian436/xiaobainian436.github.io@main/youtanxingyuan.mp4' },
+            { id: 'dream_mist', name: '绮梦雾海', theme: 'mystic', themeName: '粉紫：梦幻与幽秘', color: '#d946ef', sec: '#701a75', icon: '🌫️', desc: '永续的淡紫色薄雾笼罩岛屿，其中生长着巨大的发光花卉，虚实难辨，仿佛行走在他人梦中。', image: 'https://cdn.jsdelivr.net/gh/xiaobainian436/xiaobainian436.github.io@main/qimengwuhai.png', video: 'https://cdn.jsdelivr.net/gh/xiaobainian436/xiaobainian436.github.io@main/qimengwuhai.mp4' },
+            { id: 'floating_forest', name: '森息浮屿', theme: 'nature', themeName: '绿色：生机与秘境', color: '#10b981', sec: '#064e3b', icon: '🌿', desc: '由盘根错节的古树根系托起的空中森林岛屿，云雾缭绕，是气息绵长的生命净土。', image: 'https://cdn.jsdelivr.net/gh/xiaobainian436/xiaobainian436.github.io@main/senxifuyu.png', video: 'https://cdn.jsdelivr.net/gh/xiaobainian436/xiaobainian436.github.io@main/senxifuyu.mp4' },
+            { id: 'melody_prairie', name: '千籁草原', theme: 'nature', themeName: '绿色：生机与秘境', color: '#84cc16', sec: '#365314', icon: '🍃', desc: '每一片草叶都能在风中发出细微乐音，整片草原就是活的乐器，奏响永不停息的自然交响诗。', image: 'https://cdn.jsdelivr.net/gh/xiaobainian436/xiaobainian436.github.io@main/qianlaicaoyuan.png', video: 'https://cdn.jsdelivr.net/gh/xiaobainian436/xiaobainian436.github.io@main/qianlaicaoyuan.mp4' },
+            { id: 'ice_abyss', name: '永寂冰渊', theme: 'cool', themeName: '蓝色：凛冽与深邃', color: '#3b82f6', sec: '#1e3a8a', icon: '❄️', desc: '巨大的蓝色冰川内部空腔世界，时间仿佛冻结，唯有幽蓝冰光与深海回响，寂静而神圣。', image: 'https://cdn.jsdelivr.net/gh/xiaobainian436/xiaobainian436.github.io@main/yongjibingyuan.png', video: 'https://cdn.jsdelivr.net/gh/xiaobainian436/xiaobainian436.github.io@main/yongjibingyuan.mp4' },
+            { id: 'azure_steps', name: '沧澜云阶', theme: 'cool', themeName: '蓝色：凛冽与深邃', color: '#0ea5e9', sec: '#0c4a6e', icon: '☁️', desc: '海水蒸腾为蓝色云雾，化作连接天地的流动阶梯。', image: 'https://cdn.jsdelivr.net/gh/xiaobainian436/xiaobainian436.github.io@main/canglanyunjie.png', video: 'https://cdn.jsdelivr.net/gh/xiaobainian436/xiaobainian436.github.io@main/canglanyunjie.mp4' },
+            { id: 'tidal_crown', name: '汐语之冠', theme: 'cool', themeName: '蓝色：凛冽与深邃', color: '#06b6d4', sec: '#164e63', icon: '🌊', desc: '潮汐穿过天然冠冕般的山体，鸣响如大海呼吸的韵律。', image: 'https://cdn.jsdelivr.net/gh/xiaobainian436/xiaobainian436.github.io@main/xiyuzhiguan.png', video: 'https://cdn.jsdelivr.net/gh/xiaobainian436/xiaobainian436.github.io@main/xiyuzhiguan.mp4' }
+        ];
+
+        let audioCtx, melodyGain, melodyInterval, musicMuted = false, userData = { 
+            answers: [], boxIdx: 0, climateIdx: 0, targetIsland: null, 
+            tokenFiles: [null, null, null], hasImageToken: false, imageColors: [], 
+            bgObjects: [], themeDirection: 'default', destinyNodes: [],
+            altarScores: [0, 0, 0, 0, 0, 0] // 记录6个属性的阶段
+        };
+        let currentStep = -1;
+        let bgAnimId = null;
+
+        let pendingNodePos = null;
+        let pendingNodeType = null;
+        let draggedNode = null;
+        let baselineNodes = [{x: 52, y: 390}, {x: 468, y: 390}];
+        let topologyLoopId = null;
+
+        window.onload = () => {
+            const hg = document.getElementById('hourglass-overlay');
+            const mask = document.getElementById('init-white-mask');
+            const bgCanvas = document.getElementById('deconstructed-bg-canvas');
+            bgCanvas.width = window.innerWidth; bgCanvas.height = window.innerHeight;
+            requestAnimationFrame(() => { hg.style.opacity = '1'; });
+            setTimeout(() => {
+                hg.style.opacity = '0'; hg.style.filter = 'blur(20px)';
+                if(mask) mask.style.opacity = '0';
+                setTimeout(() => { hg.style.display = 'none'; navigateTo(0); }, 1500);
+            }, 5000); 
+            initStars();
+        };
+
+        function unlockAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                melodyGain = audioCtx.createGain();
+                melodyGain.gain.setValueAtTime(0, audioCtx.currentTime);
+                melodyGain.connect(audioCtx.destination);
+            }
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+        }
+
+        function toggleMusic() {
+            musicMuted = !musicMuted;
+            const onIcon = document.getElementById('music-icon-on');
+            const offIcon = document.getElementById('music-icon-off');
+            if (melodyGain) {
+                if (musicMuted) {
+                    melodyGain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.5);
+                    onIcon.classList.add('hidden');
+                    offIcon.classList.remove('hidden');
+                } else {
+                    melodyGain.gain.linearRampToValueAtTime(0.75, audioCtx.currentTime + 1.5);
+                    onIcon.classList.remove('hidden');
+                    offIcon.classList.add('hidden');
+                }
+            }
+            playClick();
+        }
+
+        function startThemeMelody(theme) {
+            if (!audioCtx) return;
+            if (melodyInterval) clearTimeout(melodyInterval);
+            const scales = {
+                'warm': [440, 554, 659, 880, 1108],      
+                'mystic': [349, 415, 523, 698, 830],    
+                'nature': [392, 440, 523, 659, 783],    
+                'cool': [523, 659, 783, 1046, 1318]     
+            };
+            const currentScale = scales[theme] || scales['warm'];
+            const type = 'sine'; 
+            const playCycle = () => {
+                if (musicMuted) return;
+                const rootIdx = Math.floor(Math.random() * (currentScale.length - 2));
+                const chord = [currentScale[rootIdx], currentScale[rootIdx + 1], currentScale[rootIdx + 2]];
+                chord.forEach((freq, i) => {
+                    const delay = i * 0.15 + Math.random() * 0.05;
+                    const duration = 4.0 + Math.random() * 2.0; 
+                    setTimeout(() => playTone(freq, type, duration, 0.12), delay * 1000);
+                });
+                const nextPulse = 1800 + Math.random() * 1200;
+                melodyInterval = setTimeout(playCycle, nextPulse);
+            };
+            melodyGain.gain.linearRampToValueAtTime(0.75, audioCtx.currentTime + 3);
+            playCycle();
+        }
+
+        function playTone(freq, type, duration, volume = 0.375) {
+            const osc = audioCtx.createOscillator();
+            const g = audioCtx.createGain();
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            g.gain.setValueAtTime(0, audioCtx.currentTime);
+            g.gain.linearRampToValueAtTime(volume, audioCtx.currentTime + 0.8); 
+            g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration); 
+            osc.connect(g);
+            g.connect(melodyGain);
+            osc.start();
+            osc.stop(audioCtx.currentTime + duration);
+        }
+
+        window.onresize = () => {
+            const bgCanvas = document.getElementById('deconstructed-bg-canvas');
+            if (bgCanvas) { bgCanvas.width = window.innerWidth; bgCanvas.height = window.innerHeight; }
+        };
+
+        function triggerUpload(idx) { 
+            unlockAudio(); 
+            if (userData.tokenFiles[idx]) return; 
+            document.getElementById(`upload-${idx}`).click(); 
+        }
+
+        async function handleFileChange(idx) {
+            const input = document.getElementById(`upload-${idx}`);
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
+                userData.tokenFiles[idx] = file;
+                const slot = document.getElementById(`slot-${idx}`);
+                slot.classList.add('active'); slot.querySelector('.slot-label').innerText = '已感应';
+                if (file.type.startsWith('image')) {
+                    userData.hasImageToken = true; processImageForBackground(file);
+                }
+                playClick(); 
+                updateProceedState();
+            }
+        }
+
+        function updateGlobalThemeColors(theme) {
+            const root = document.documentElement;
+            const themes = {
+                'warm': { 
+                    'c1': '#450a0a', 'c2': '#7f1d1d', 'c3': '#991b1b', 'c4': '#1a0505',
+                    'grad': 'linear-gradient(to bottom, #2d0606, #0f0505)'
+                },
+                'nature': { 
+                    'c1': '#064e3b', 'c2': '#065f46', 'c3': '#14532d', 'c4': '#020f0a',
+                    'grad': 'linear-gradient(to bottom, #04241a, #020f0a)'
+                },
+                'mystic': { 
+                    'c1': '#4c1d95', 'c2': '#701a75', 'c3': '#831843', 'c4': '#1a021a',
+                    'grad': 'linear-gradient(to bottom, #240b36, #0f021a)'
+                },
+                'cool': { 
+                    'c1': '#1e3a8a', 'c2': '#1e40af', 'c3': '#111827', 'c4': '#02051a',
+                    'grad': 'linear-gradient(to bottom, #020617, #0f172a)'
+                }
+            };
+            
+            const config = themes[theme] || themes['cool'];
+            root.style.setProperty('--bg-c1', config.c1);
+            root.style.setProperty('--bg-c2', config.c2);
+            root.style.setProperty('--bg-c3', config.c3);
+            root.style.setProperty('--bg-c4', config.c4);
+            root.style.setProperty('--step0-grad', config.grad);
+        }
+
+        async function processImageForBackground(file) {
+            const img = new Image(); img.src = URL.createObjectURL(file); await img.decode();
+            const offCanvas = document.createElement('canvas'); const offCtx = offCanvas.getContext('2d');
+            offCanvas.width = 50; offCanvas.height = 50; offCtx.drawImage(img, 0, 0, 50, 50);
+            const pixelData = offCtx.getImageData(0, 0, 50, 50).data;
+            const colors = []; let totalR = 0, totalG = 0, totalB = 0;
+            for (let i = 0; i < pixelData.length; i += 4) {
+                const r = pixelData[i], g = pixelData[i+1], b = pixelData[i+2];
+                totalR += r; totalG += g; totalB += b;
+                if (i % 20 === 0) colors.push({ r, g, b, a: 0.15 + Math.random() * 0.1 });
+            }
+            const avgR = totalR / (50*50), avgG = totalG / (50*50), avgB = totalB / (50*50);
+            const isWhite = avgR > 210 && avgG > 210 && avgB > 210;
+            if (isWhite) { userData.themeDirection = 'cool'; } 
+            else if (avgB > avgR && avgB > avgG) { userData.themeDirection = 'cool'; } 
+            else if (avgG >= avgR && avgG > avgB) { userData.themeDirection = 'nature'; } 
+            else if (avgR > avgG && avgB > avgG) { userData.themeDirection = 'mystic'; } 
+            else if (avgR > avgG) { userData.themeDirection = 'warm'; } 
+            else { userData.themeDirection = 'mystic'; }
+            
+            updateGlobalThemeColors(userData.themeDirection);
+            userData.imageColors = colors; initBackgroundObjects();
+        }
+
+        function initBackgroundObjects() {
+            const colors = userData.imageColors; userData.bgObjects = []; const count = 150; 
+            for(let i=0; i<count; i++) {
+                const colorObj = colors[Math.floor(Math.random() * colors.length)];
+                const isGrey = Math.random() > 0.8; const gVal = Math.floor((colorObj.r + colorObj.g + colorObj.b) / 3);
+                userData.bgObjects.push({
+                    x: Math.random() * window.innerWidth, y: Math.random() * window.innerHeight,
+                    vx: (Math.random() - 0.5) * 0.4, vy: (Math.random() - 0.5) * 0.4,
+                    size: 60 + Math.random() * 300, rotation: Math.random() * Math.PI * 2,
+                    rotSpeed: (Math.random() - 0.5) * 0.002, type: Math.random(), isGrey,
+                    color: isGrey ? `rgba(${gVal+30},${gVal+30},${gVal+30},${colorObj.a})` : `rgba(${colorObj.r},${colorObj.g},${colorObj.b},${colorObj.a})`,
+                    stroke: `rgba(255,255,255,${0.15 + Math.random() * 0.15})`
+                });
+            }
+            if(!bgAnimId) startBackgroundAnimation();
+        }
+
+        function startBackgroundAnimation() {
+            const canvas = document.getElementById('deconstructed-bg-canvas'); const ctx = canvas.getContext('2d');
+            const animate = () => {
+                if(!userData.hasImageToken) { bgAnimId = null; return; }
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                userData.bgObjects.forEach(obj => {
+                    obj.x += obj.vx; obj.y += obj.vy; obj.rotation += obj.rotSpeed;
+                    if(obj.x < -obj.size) obj.x = canvas.width + obj.size; if(obj.x > canvas.width + obj.size) obj.x = -obj.size;
+                    if(obj.y < -obj.size) obj.y = canvas.height + obj.size; if(obj.y > canvas.height + obj.size) obj.y = -obj.size;
+                    ctx.save(); ctx.translate(obj.x, obj.y); ctx.rotate(obj.rotation); ctx.fillStyle = obj.color; ctx.strokeStyle = obj.stroke; ctx.lineWidth = 0.8;
+                    if (obj.type < 0.3) { ctx.beginPath(); ctx.moveTo(0, -obj.size/2); ctx.lineTo(obj.size/2, obj.size/2); ctx.lineTo(-obj.size/2, obj.size/2); ctx.closePath(); ctx.fill(); ctx.stroke(); } 
+                    else if (obj.type < 0.6) { const r = obj.size / 6; ctx.beginPath(); if (ctx.roundRect) ctx.roundRect(-obj.size/2, -obj.size/2, obj.size, obj.size, [r, r, r, r]); else ctx.rect(-obj.size/2, -obj.size/2, obj.size, obj.size); ctx.fill(); ctx.stroke(); } 
+                    else if (obj.type < 0.8) { ctx.beginPath(); ctx.ellipse(0, 0, obj.size/2, obj.size/3, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke(); } 
+                    else { ctx.strokeRect(-obj.size/2, -obj.size/2, obj.size, obj.size); }
+                    ctx.restore();
+                });
+                bgAnimId = requestAnimationFrame(animate);
+            };
+            animate();
+        }
+
+        function clearSlot(event, idx) {
+            event.stopPropagation(); userData.tokenFiles[idx] = null;
+            document.getElementById(`upload-${idx}`).value = "";
+            const slot = document.getElementById(`slot-${idx}`);
+            slot.classList.remove('active'); slot.querySelector('.slot-label').innerText = '投放生命信物'; 
+            userData.hasImageToken = userData.tokenFiles.some(f => f && f.type.startsWith('image'));
+            if (!userData.hasImageToken) { 
+                const canvas = document.getElementById('deconstructed-bg-canvas'); if(canvas) canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height); 
+                updateGlobalThemeColors('cool');
+            }
+            playClick(); updateProceedState();
+        }
+
+        function updateProceedState() { const hasToken = userData.tokenFiles.some(f => f !== null); document.getElementById('proceed-trigger').classList.toggle('ready', hasToken); }
+
+        function navigateTo(s, direction = 'out') {
+            const isGoingBack = direction === 'back';
+            const curContainer = document.querySelector(`.step-container.active`);
+            if (curContainer) curContainer.classList.remove('active');
+            if (currentStep !== -1) triggerRipple(isGoingBack ? 'in' : 'out'); 
+            const progressBar = document.getElementById('progress-bar');
+            progressBar.style.opacity = s >= 4 ? '0' : '1';
+            for(let i=0; i<4; i++) {
+                const dot = document.getElementById(`dot-${i}`);
+                dot.classList.remove('active', 'completed');
+                if (i === s) dot.classList.add('active'); else if (i < s) dot.classList.add('completed');
+            }
+            if (s === 4 && !isGoingBack) setTimeout(startDestinyBubbles, 800); 
+            
+            if (s === 4 && !userData.targetIsland) {
+                const answer = userData.answers[0];
+                const mapping = {
+                    '熔火淬兵': 'ember_island', '焚风试炼': 'ember_island',
+                    '鎏金纹身': 'maple_cliff', '赤枫血誓': 'maple_cliff',
+                    '织梦香氛': 'dream_mist', '雾海寻真': 'dream_mist',
+                    '灵汐同频': 'violet_valley',
+                    '星昙祈愿': 'starry_field',
+                    '根脉聆讯': 'melody_prairie', '千籁和鸣': 'melody_prairie',
+                    '生机反哺': 'floating_forest', '雾径问安': 'floating_forest',
+                    '潮汐校历': 'tidal_crown', '凝雾塑形': 'tidal_crown',
+                    '云阶献祭': 'azure_steps',
+                    '渊瞳巡礼': 'ice_abyss'
+                };
+                const targetId = mapping[answer] || 'ember_island';
+                userData.targetIsland = islandTypes.find(t => t.id === targetId);
+            }
+
+            const canvasBg = document.getElementById('bg-canvas'), finalBg = document.getElementById('bg-final'), step0Bg = document.getElementById('step0-bg'), deconstructedBg = document.getElementById('deconstructed-bg-canvas');
+            if (s === 0) { canvasBg.style.opacity = '1'; setTimeout(() => { step0Bg.classList.add('show-bg'); }, 1000); } 
+            else { step0Bg.classList.remove('show-bg'); }
+            if (userData.hasImageToken && s >= 1 && s <= 3) deconstructedBg.style.opacity = '1'; else deconstructedBg.style.opacity = '0';
+            if (s === 4) {
+                const isl = userData.targetIsland || islandTypes[0];
+                finalBg.style.background = `linear-gradient(135deg, #f8fafc 0%, #f1f5f9 40%, ${isl.color}77 100%)`;
+                finalBg.style.opacity = '1'; canvasBg.style.opacity = '0'; document.body.classList.add('light-mode');
+                startThemeMelody(isl.theme);
+                document.getElementById('music-toggle').classList.add('visible');
+            } else { 
+                finalBg.style.opacity = '0'; if (s !== 0) canvasBg.style.opacity = '1'; 
+                document.body.classList.remove('light-mode'); 
+                if (s < 4) { 
+                    userData.targetIsland = null; 
+                    document.getElementById('bubble-container').innerHTML = ''; 
+                    if(melodyInterval) { clearTimeout(melodyInterval); melodyInterval = null; }
+                    if(melodyGain) melodyGain.gain.setValueAtTime(0, audioCtx.currentTime);
+                    document.getElementById('music-toggle').classList.remove('visible');
+                    const container = document.getElementById('reified-image');
+                    container.innerHTML = '';
+                    container.classList.add('opacity-0');
+                    document.getElementById('reify-btn').classList.remove('hidden');
+                    document.getElementById('stereo-btn').classList.add('hidden');
+                    document.getElementById('cancel-stereo-btn').classList.add('hidden');
+                    document.getElementById('island-visual').style.opacity = 1;
+                    if(topologyLoopId) cancelAnimationFrame(topologyLoopId);
+                    if(altarLoopId) { cancelAnimationFrame(altarLoopId); altarLoopId = null; }
+                } 
+            }
+            setTimeout(() => {
+                document.querySelectorAll('.step-container').forEach(c => { c.style.display = 'none'; c.classList.remove('active'); });
+                const container = document.getElementById(`step-${s}`);
+                if (!container) return;
+                container.style.display = 'flex';
+                void container.offsetWidth; 
+                requestAnimationFrame(() => { container.classList.add('active'); });
+                currentStep = s;
+                document.getElementById(`global-back`).classList.toggle('hidden', s === 0);
+                if (s === 1) initClimate(); if (s === 2) initTopology(); if (s === 3) initAltar(); if (s === 4) showResult();
+            }, isGoingBack ? 1000 : 550); 
+        }
+
+        function showLoading(cb) {
+            const l = document.getElementById('loading-overlay');
+            l.style.display = 'flex'; l.style.opacity = '0'; l.style.filter = 'blur(15px)';
+            l.offsetHeight; l.style.transition = 'opacity 0.6s ease, filter 0.6s ease'; l.style.opacity = '1'; l.style.filter = 'blur(0px)';
+            setTimeout(() => {
+                l.style.transition = 'opacity 0.4s ease-in, filter 0.4s ease-in'; l.style.opacity = '0'; l.style.filter = 'blur(25px)';
+                setTimeout(() => { l.style.display = 'none'; cb(); }, 400);
+            }, 1200);
+        }
+
+        function processStep(s) { unlockAudio(); playClick(); showLoading(() => navigateTo(s + 1)); }
+
+        function initClimate() {
+            const themeConfigs = {
+                'warm': { title: '炽烈与绚烂', opts: [{ name: '熔火淬兵', desc: '引熔岩入地脉，锻造不朽神兵。' }, { name: '焚风试炼', desc: '穿越炙热沙海，完成成年礼。' }, { name: '鎏金纹身', desc: '以矿岩金粉纹身，铭刻功勋。' }, { name: '赤枫血誓', desc: '饮赤枫血露，立永恒誓言。' }] },
+                'mystic': { title: '梦幻与幽秘', opts: [{ name: '织梦香氛', desc: '调香入梦，共赴预言幻境。' }, { name: '雾海寻真', desc: '撤去路标，凭灵觉走出迷途。' }, { name: '灵汐同频', desc: '静坐花海，同步生命波动。' }, { name: '星昙祈愿', desc: '借昙花星辉，让愿望上达天听。' }] },
+                'nature': { title: '生机与秘境', opts: [{ name: '根脉聆讯', desc: '耳贴古树，听取大地箴言。' }, { name: '千籁和鸣', desc: '以草木为器，与风共奏。' }, { name: '生机反哺', desc: '为新生命种下对应森林。' }, { name: '雾径问安', desc: '随雾探秘，问候未知生灵。' }] },
+                'cool': { title: '凛冽与深邃', opts: [{ name: '潮汐校历', desc: '听汐声辨时节，校准历法。' }, { name: '云阶献祭', desc: '登云雾阶梯，献祭以求智慧。' }, { name: '渊瞳巡礼', desc: '绕行之渊航行，纪念与沉思。' }, { name: '凝雾塑形', desc: '捕雾凝冰雕，礼成即消散。' }] }
+            };
+            const currentConfig = themeConfigs[userData.themeDirection] || themeConfigs['warm'];
+            const questionEl = document.getElementById('climate-question');
+            questionEl.innerText = `当前感应：${currentConfig.title}。请选择您的仪式行为：`;
+            const box = document.getElementById('climate-options');
+            box.innerHTML = '';
+            currentConfig.opts.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = "w-full py-5 px-8 border border-white/10 rounded-full hover:bg-white hover:text-slate-900 transition-all text-left bg-white/5 backdrop-blur-sm shadow-lg group relative overflow-hidden";
+                btn.innerHTML = `<div class="flex flex-col gap-1 relative z-10"><span class="text-[13px] tracking-widest font-bold uppercase">${opt.name}</span><span class="text-[10px] opacity-50 group-hover:opacity-100 transition-opacity">${opt.desc}</span></div><div class="absolute right-6 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-20 transition-all text-2xl">✨</div>`;
+                btn.onclick = () => { playClick(); userData.answers[0] = opt.name; userData.climateIdx = idx; navigateTo(2); };
+                box.appendChild(btn);
+            });
+        }
+
+        function initTopology() {
+            const svg = document.getElementById('topology-svg'); 
+            const hint = document.getElementById('topology-hint'); 
+            const btn = document.getElementById('topo-activate-btn');
+            const menu = document.getElementById('topology-menu');
+            if(!svg) return; 
+            
+            svg.innerHTML = ''; 
+            userData.destinyNodes = []; 
+            hint.style.opacity = '1';
+            menu.style.display = 'none';
+            btn.className = "px-20 py-5 bg-white/5 border border-white/10 text-white/20 rounded-full text-[10px] tracking-[0.8em] font-bold uppercase transition-all shadow-xl pointer-events-none";
+
+            const baselinePath = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            baselinePath.setAttribute("x1", baselineNodes[0].x); baselinePath.setAttribute("y1", baselineNodes[0].y);
+            baselinePath.setAttribute("x2", baselineNodes[1].x); baselinePath.setAttribute("y2", baselineNodes[1].y);
+            baselinePath.setAttribute("stroke", "white"); baselinePath.setAttribute("stroke-opacity", "0.3");
+            baselinePath.setAttribute("stroke-width", "1"); baselinePath.setAttribute("stroke-dasharray", "4,4");
+            svg.appendChild(baselinePath);
+
+            baselineNodes.forEach(node => {
+                const c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                c.setAttribute("cx", node.x); c.setAttribute("cy", node.y); c.setAttribute("r", 3);
+                c.setAttribute("fill", "white"); c.setAttribute("fill-opacity", "0.5");
+                svg.appendChild(c);
+            });
+
+            svg.onmousedown = (e) => { 
+                if (draggedNode) return;
+                const rect = svg.getBoundingClientRect(); 
+                const x = e.clientX - rect.left; 
+                const y = e.clientY - rect.top; 
+                
+                if (e.target.tagName === 'svg' || e.target.tagName === 'line') {
+                    if(menu.style.display === 'flex') {
+                        closeTopologyMenu();
+                    } else {
+                        pendingNodePos = { x, y };
+                        menu.classList.remove('menu-hiding');
+                        menu.style.display = 'flex';
+                        menu.style.left = `${e.clientX}px`;
+                        menu.style.top = `${e.clientY}px`;
+                        document.getElementById('topology-input-area').style.display = 'none';
+                        document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('selected'));
+                        playClick();
+                    }
+                }
+            };
+
+            window.addEventListener('mousemove', handleNodeDrag);
+            window.addEventListener('mouseup', handleNodeDragEnd);
+
+            const tick = () => {
+                const time = Date.now() * 0.001;
+                userData.destinyNodes.forEach(node => {
+                    node.currentX += (node.targetX - node.currentX) * 0.12;
+                    node.currentY += (node.targetY - node.currentY) * 0.12;
+                    const breathScale = 1 + Math.sin(time * 1.5) * 0.04;
+                    const breathY = Math.sin(time * 1.2) * 2.5;
+                    const altitude = Math.max(0, (520 - node.currentY) / 520);
+                    const finalScale = (0.75 + altitude * 0.5) * breathScale;
+                    const finalBrightness = 0.8 + altitude * 1.2;
+                    const glowSize = altitude * 18;
+                    const lineWidth = 0.6 + altitude * 2.8;
+                    node.group.setAttribute("transform", `translate(${node.currentX}, ${node.currentY + breathY}) scale(${finalScale})`);
+                    node.group.style.filter = `brightness(${finalBrightness}) drop-shadow(0 0 ${glowSize}px rgba(255,255,255,0.4))`;
+                    node.lines.forEach(line => {
+                        line.setAttribute("x1", node.currentX);
+                        line.setAttribute("y1", node.currentY + breathY);
+                        line.setAttribute("stroke-width", lineWidth);
+                        line.setAttribute("stroke-opacity", 0.15 + altitude * 0.4);
+                    });
+                });
+                topologyLoopId = requestAnimationFrame(tick);
+            };
+            tick();
+        }
+
+        function closeTopologyMenu() {
+            const menu = document.getElementById('topology-menu');
+            menu.classList.add('menu-hiding');
+            setTimeout(() => { menu.style.display = 'none'; menu.classList.remove('menu-hiding'); }, 300);
+        }
+
+        function prepareDestinyNode(type) {
+            pendingNodeType = type;
+            playClick();
+            const area = document.getElementById('topology-input-area');
+            const prompt = document.getElementById('topology-input-prompt');
+            const field = document.getElementById('topology-input-field');
+            area.style.display = 'flex';
+            field.value = '';
+            field.focus();
+            const prompts = {
+                'circle': '陪伴的人或事物？', 'star': '启发的人或事物？', 'triangle': '激励的人或事物？',
+                'quad': '治愈的人或事物？', 'harm': '伤害的人或事物？', 'custom': '其他深刻记忆？'
+            };
+            prompt.innerText = prompts[type] || '镌刻感悟...';
+            document.querySelectorAll('.menu-item').forEach(m => {
+                const labelText = m.querySelector('.label').innerText;
+                const matchMap = {'陪伴':'circle', '启发':'star', '激励':'triangle', '治愈':'quad', '伤害':'harm', '自定义':'custom'};
+                m.classList.toggle('selected', matchMap[labelText] === type);
+            });
+        }
+
+        function finalizeDestinyNode() {
+            const svg = document.getElementById('topology-svg');
+            const hint = document.getElementById('topology-hint');
+            const btn = document.getElementById('topo-activate-btn');
+            const textContent = document.getElementById('topology-input-field').value || '未命名的痕迹';
+            if (!pendingNodePos || !pendingNodeType) return;
+            const { x, y } = pendingNodePos;
+            hint.style.opacity = '0';
+            closeTopologyMenu();
+            playClick();
+
+            const group = document.createElementNS("http://www.w3.org/2000/svg", "g");
+            group.setAttribute("class", "topology-node-group");
+            
+            const lines = baselineNodes.map(base => {
+                const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                line.setAttribute("x1", x); line.setAttribute("y1", y);
+                line.setAttribute("x2", base.x); line.setAttribute("y2", base.y);
+                line.setAttribute("stroke", "white"); line.setAttribute("stroke-opacity", "0.2");
+                line.setAttribute("stroke-width", "0.8");
+                svg.insertBefore(line, svg.firstChild);
+                return line;
+            });
+
+            let shape; 
+            if (pendingNodeType === 'circle') {
+                shape = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                shape.setAttribute("cx", 0); shape.setAttribute("cy", 0); shape.setAttribute("r", 4);
+            } else if (pendingNodeType === 'star') {
+                shape = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+                let points = ""; for(let i=0; i<10; i++) { let r = i % 2 === 0 ? 6 : 3; let a = (i * 36) * Math.PI / 180; points += `${r * Math.sin(a)},${-r * Math.cos(a)} `; }
+                shape.setAttribute("points", points);
+            } else if (pendingNodeType === 'triangle') {
+                shape = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+                shape.setAttribute("points", "0,-6 -6,6 6,6");
+            } else if (pendingNodeType === 'quad') {
+                shape = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+                shape.setAttribute("x", -4.5); shape.setAttribute("y", -4.5); shape.setAttribute("width", 9); shape.setAttribute("height", 9); shape.setAttribute("rx", 2);
+            } else if (pendingNodeType === 'harm') {
+                shape = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+                shape.setAttribute("points", "0,6 -6,-6 6,-6");
+            } else if (pendingNodeType === 'custom') {
+                shape = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+                shape.setAttribute("points", "0,-6 -4.5,0 0,6 4.5,0");
+            }
+            shape.setAttribute("fill", "white");
+            shape.setAttribute("class", "topology-node");
+
+            const label = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            label.setAttribute("x", 0); label.setAttribute("y", 20);
+            label.setAttribute("class", "topology-label-text");
+            label.textContent = textContent;
+
+            group.appendChild(shape);
+            group.appendChild(label);
+            svg.appendChild(group);
+
+            const nodeObj = { targetX: x, targetY: y, currentX: x, currentY: y, type: pendingNodeType, text: textContent, group, lines };
+            userData.destinyNodes.push(nodeObj);
+            
+            group.onmousedown = (e) => { e.stopPropagation(); draggedNode = nodeObj; playClick(); };
+
+            if (userData.destinyNodes.length >= 2) btn.className = "px-20 py-5 bg-white/95 text-slate-900 rounded-full text-[10px] tracking-[0.8em] font-bold uppercase hover:scale-105 transition-all shadow-xl pointer-events-auto cursor-pointer";
+            pendingNodePos = null; pendingNodeType = null;
+        }
+
+        function triggerStep2Process() {
+            if (userData.destinyNodes.length > 0) {
+                const overlay = document.getElementById('note-transition-overlay');
+                const content = document.getElementById('note-content');
+                overlay.style.filter = 'none'; 
+                content.innerText = userData.destinyNodes.map(s => s.text).join(' · ');
+                overlay.style.display = 'flex';
+                setTimeout(() => { overlay.style.opacity = '1'; overlay.style.backdropFilter = 'blur(15px)'; }, 50);
+            } else {
+                processStep(2);
+            }
+        }
+
+        function washMemory() {
+            const note = document.getElementById('destiny-note');
+            const container = document.getElementById('wave-layers-container');
+            playClick();
+            
+            // 构造并注入几何海浪层 - 颜色与主题正相关，低饱和度
+            const waveThemes = {
+                'warm': [ // 珊瑚/红
+                    { color: "rgba(224, 122, 95, 0.2)", delay: 0 },
+                    { color: "rgba(235, 155, 138, 0.25)", delay: 0.15 },
+                    { color: "rgba(242, 190, 180, 0.3)", delay: 0.3 },
+                    { color: "rgba(255, 220, 210, 0.35)", delay: 0.45 }
+                ],
+                'mystic': [ // 灰紫
+                    { color: "rgba(145, 127, 179, 0.2)", delay: 0 },
+                    { color: "rgba(175, 161, 204, 0.25)", delay: 0.15 },
+                    { color: "rgba(200, 190, 220, 0.3)", delay: 0.3 },
+                    { color: "rgba(225, 215, 240, 0.35)", delay: 0.45 }
+                ],
+                'nature': [ // 灰绿
+                    { color: "rgba(107, 142, 120, 0.2)", delay: 0 },
+                    { color: "rgba(138, 168, 148, 0.25)", delay: 0.15 },
+                    { color: "rgba(170, 195, 180, 0.3)", delay: 0.3 },
+                    { color: "rgba(200, 220, 210, 0.35)", delay: 0.45 }
+                ],
+                'cool': [ // 灰蓝
+                    { color: "rgba(100, 130, 160, 0.2)", delay: 0 },
+                    { color: "rgba(140, 165, 190, 0.25)", delay: 0.15 },
+                    { color: "rgba(180, 200, 220, 0.3)", delay: 0.3 },
+                    { color: "rgba(210, 230, 245, 0.35)", delay: 0.45 }
+                ]
+            };
+
+            const waveConfigs = waveThemes[userData.themeDirection] || waveThemes['cool'];
+
+            container.innerHTML = waveConfigs.map((wave, i) => `
+                <div class="wave-layer" style="transition-delay: ${wave.delay}s">
+                    <svg viewBox="0 0 1200 300" preserveAspectRatio="none">
+                        <path fill="${wave.color}" d="M0,300 L0,150 C150,${100 + i * 20} 350,${0 + i * 10} 600,${100 + i * 10} C850,${200 - i * 10} 1050,${100 + i * 10} 1200,150 L1200,300 Z" />
+                    </svg>
+                    <div class="wave-fill" style="background-color: ${wave.color}"></div>
+                </div>
+            `).join('');
+
+            // 触发入场动画
+            setTimeout(() => {
+                container.querySelectorAll('.wave-layer').forEach(l => l.classList.add('active'));
+                note.style.transition = 'all 2.2s cubic-bezier(0.4, 0, 0.2, 1)';
+                note.style.transform = 'translateY(-180px) rotate(-12deg)';
+                note.style.opacity = '0';
+            }, 50);
+
+            // 离场动画对称执行
+            setTimeout(() => {
+                container.querySelectorAll('.wave-layer').forEach(l => l.classList.remove('active'));
+            }, 2500);
+
+            setTimeout(() => finishNoteTransition(), 4000);
+        }
+
+        function lightMemory() {
+            const note = document.getElementById('destiny-note');
+            playClick();
+            note.style.boxShadow = "0 0 160px 80px rgba(255,255,255,1)";
+            note.style.background = "#fff";
+            
+            // 幻化粒子动画 - 增加 10 倍数量 (400)
+            setTimeout(() => {
+                note.style.opacity = '0';
+                note.style.transform = 'scale(0.3)';
+                const rect = note.getBoundingClientRect();
+                const centerX = rect.left + rect.width / 2;
+                const centerY = rect.top + rect.height / 2;
+                
+                for(let i=0; i<400; i++) {
+                    const p = document.createElement('div');
+                    p.className = 'memory-particle';
+                    p.style.left = centerX + 'px';
+                    p.style.top = centerY + 'px';
+                    
+                    const rSize = 2 + Math.random() * 4;
+                    p.style.width = rSize + 'px';
+                    p.style.height = rSize + 'px';
+                    
+                    document.body.appendChild(p);
+                    
+                    const angle = Math.random() * Math.PI * 2;
+                    const dist = 400 + Math.random() * 600;
+                    
+                    p.animate([
+                        { transform: 'translate(0, 0) scale(1)', opacity: 1 },
+                        { transform: `translate(${Math.cos(angle) * dist}px, ${Math.sin(angle) * dist}px) scale(0)`, opacity: 0 }
+                    ], { 
+                        duration: 1200 + Math.random() * 1500, 
+                        easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)' 
+                    }).onfinish = () => p.remove();
+                }
+            }, 600);
+            
+            setTimeout(() => finishNoteTransition(), 2500);
+        }
+
+        function finishNoteTransition() {
+            const overlay = document.getElementById('note-transition-overlay');
+            overlay.style.opacity = '0';
+            overlay.style.filter = 'blur(30px)';
+            setTimeout(() => { 
+                overlay.style.display = 'none'; 
+                document.getElementById('wave-layers-container').innerHTML = '';
+                document.getElementById('destiny-note').style.cssText = '';
+                processStep(2); 
+            }, 1000);
+        }
+
+        function handleNodeDrag(e) {
+            if (!draggedNode) return;
+            const svg = document.getElementById('topology-svg');
+            const rect = svg.getBoundingClientRect();
+            draggedNode.targetX = Math.max(10, Math.min(510, e.clientX - rect.left));
+            draggedNode.targetY = Math.max(10, Math.min(510, e.clientY - rect.top));
+        }
+
+        function handleNodeDragEnd() {
+            if (draggedNode) { draggedNode = null; playClick(); }
+        }
+
+        function showError(text) {
+            const modal = document.getElementById('error-modal');
+            const textEl = document.getElementById('error-text');
+            textEl.innerText = text;
+            modal.classList.add('show');
+            setTimeout(() => modal.classList.remove('show'), 4000);
+        }
+
+        // --- 祭坛蓄力逻辑 ---
+        let altarLoopId = null;
+        let chargingItem = null;
+        let chargeTime = 0; 
+        let lastMilestone = 0;
+
+        function initAltar() {
+            const ring = document.getElementById('altar-ring'); ring.innerHTML = '';
+            const confirmBtn = document.getElementById('altar-confirm-btn');
+            confirmBtn.classList.remove('ready');
+            
+            userData.altarScores = [0, 0, 0, 0, 0, 0];
+
+            const items = [{n:'厚爱',i:'❤'},{n:'家境',i:'🏠'},{n:'体魄',i:'💪'},{n:'心性',i:'💎'},{n:'智力',i:'🧠'},{n:'容貌',i:'✨'}];
+            
+            items.forEach((item, i) => {
+                const angle = (i * 360) / items.length;
+                const x = Math.cos((angle * Math.PI) / 180) * 280, y = Math.sin((angle * Math.PI) / 180) * 280;
+                
+                const box = document.createElement('div');
+                box.className = "absolute altar-item flex flex-col items-center gap-5";
+                box.style.left = '50%'; box.style.top = '50%';
+                const baseTransform = `translate(calc(-50% + ${x}px), calc(-50% + ${y}px))`;
+                box.style.transform = baseTransform;
+                box.dataset.baseX = x;
+                box.dataset.baseY = y;
+                
+                box.innerHTML = `
+                    <div class="icon-box">
+                        <div class="charge-fill" style="height:0%"></div>
+                        <span class="text-4xl text-white/30 transition-colors duration-300">${item.i}</span>
+                    </div>
+                    <span class="text-[10px] tracking-[1em] text-white/20 uppercase pl-[1em] font-light transition-colors duration-300">${item.n}</span>
+                `;
+
+                const startCharge = (e) => {
+                    if (chargingItem) return;
+                    unlockAudio();
+                    const currentStage = userData.altarScores[i];
+                    chargeTime = (currentStage / 4) * 4000;
+                    lastMilestone = currentStage;
+                    
+                    chargingItem = { element: box, index: i, baseTransform };
+                    box.classList.remove('fully-charged');
+                };
+
+                const endCharge = () => {
+                    if (!chargingItem) return;
+                    const finalStage = Math.floor(chargeTime / 1000);
+                    userData.altarScores[chargingItem.index] = Math.min(finalStage, 4);
+                    
+                    if (userData.altarScores.some(s => s > 0)) {
+                        confirmBtn.classList.add('ready');
+                    }
+
+                    const reachedHeight = (userData.altarScores[chargingItem.index] / 4) * 100;
+                    chargingItem.element.querySelector('.charge-fill').style.height = reachedHeight + '%';
+                    chargingItem.element.style.transform = chargingItem.baseTransform;
+                    chargingItem.element.style.filter = userData.altarScores[chargingItem.index] >= 4 ? 'drop-shadow(0 0 20px white)' : 'none';
+                    if(userData.altarScores[chargingItem.index] >= 4) chargingItem.element.classList.add('fully-charged');
+                    
+                    chargingItem = null;
+                };
+
+                box.onmouseenter = () => {
+                    if (!chargingItem) {
+                        box.querySelector('.icon-box').style.borderColor = 'rgba(255,255,255,0.7)';
+                        box.querySelector('.icon-box').style.background = 'rgba(255,255,255,0.15)';
+                        box.querySelector('span:first-of-type').classList.replace('text-white/30', 'text-white/90');
+                        box.querySelector('span:last-of-type').classList.replace('text-white/20', 'text-white/80');
+                    }
+                };
+                box.onmouseleave = () => {
+                    if (!chargingItem) {
+                        box.querySelector('.icon-box').style.borderColor = '';
+                        box.querySelector('.icon-box').style.background = '';
+                        box.querySelector('span:first-of-type').classList.replace('text-white/90', 'text-white/30');
+                        box.querySelector('span:last-of-type').classList.replace('text-white/80', 'text-white/20');
+                    }
+                };
+
+                box.onmousedown = startCharge;
+                box.ontouchstart = (e) => { e.preventDefault(); startCharge(); };
+                window.addEventListener('mouseup', endCharge);
+                window.addEventListener('touchend', endCharge);
+                
+                ring.appendChild(box);
+            });
+
+            if (!altarLoopId) altarUpdate();
+        }
+
+        // --- 果冻跟随效果实现 ---
+        function handleJellyFollow(e) {
+            if (currentStep !== 3) return;
+            const container = document.querySelector('#step-3 .relative');
+            const rect = container.getBoundingClientRect();
+            
+            document.querySelectorAll('.altar-item').forEach(item => {
+                const baseX = parseFloat(item.dataset.baseX);
+                const baseY = parseFloat(item.dataset.baseY);
+                const dx = e.clientX - (rect.left + rect.width / 2 + baseX);
+                const dy = e.clientY - (rect.top + rect.height / 2 + baseY);
+                const dist = Math.sqrt(dx*dx + dy*dy);
+                const influence = Math.max(0, 1 - dist / 300); 
+                
+                const moveX = dx * influence * 0.12;
+                const moveY = dy * influence * 0.12;
+                
+                if (chargingItem && chargingItem.element === item) return;
+                item.style.transform = `translate(calc(-50% + ${baseX + moveX}px), calc(-50% + ${baseY + moveY}px)) scale(${1 + influence * 0.1})`;
+            });
+
+            const btn = document.getElementById('altar-confirm-btn');
+            const bRect = btn.getBoundingClientRect();
+            const bCenterX = bRect.left + bRect.width / 2;
+            const bCenterY = bRect.top + bRect.height / 2;
+            const bDx = e.clientX - bCenterX;
+            const bDy = e.clientY - bCenterY;
+            const bDist = Math.sqrt(bDx*bDx + bDy*bDy);
+            const bInfluence = Math.max(0, 1 - bDist / 400);
+            
+            const btnMoveX = bDx * bInfluence * 0.15;
+            const btnMoveY = bDy * bInfluence * 0.15;
+            btn.style.marginLeft = `${btnMoveX}px`;
+            btn.style.marginTop = `${btnMoveY}px`;
+        }
+
+        function altarUpdate() {
+            if (chargingItem) {
+                chargeTime += 16.6; 
+                const progress = Math.min(chargeTime / 4000, 1);
+                const fill = chargingItem.element.querySelector('.charge-fill');
+                fill.style.height = (progress * 100) + '%';
+                
+                const stage = Math.floor(chargeTime / 1000);
+                const stageProgress = (chargeTime % 1000) / 1000;
+                
+                const shakeIntensity = (stage + stageProgress) * 4;
+                const randX = (Math.random() - 0.5) * shakeIntensity;
+                const randY = (Math.random() - 0.5) * shakeIntensity;
+                
+                const baseX = parseFloat(chargingItem.element.dataset.baseX);
+                const baseY = parseFloat(chargingItem.element.dataset.baseY);
+                chargingItem.element.style.transform = `translate(calc(-50% + ${baseX + randX}px), calc(-50% + ${baseY + randY}px))`;
+                
+                const glowIntensity = (stage + stageProgress) * 15;
+                chargingItem.element.style.filter = `drop-shadow(0 0 ${glowIntensity}px white) brightness(${1 + stageProgress * 0.5})`;
+
+                spawnChargeParticle(chargingItem.element, true);
+
+                const currentMilestone = stage;
+                if (currentMilestone > lastMilestone && currentMilestone <= 4) {
+                    lastMilestone = currentMilestone;
+                    triggerMilestoneFlash(chargingItem.element);
+                    if (currentMilestone === 4) {
+                        triggerExplosion(chargingItem.element);
+                        chargingItem.element.classList.add('fully-charged');
+                    }
+                }
+                if (chargeTime >= 4000) chargeTime = 4000;
+            }
+            altarLoopId = requestAnimationFrame(altarUpdate);
+        }
+
+        function confirmAltarValues() {
+            playClick();
+            let maxScore = -1;
+            let bestIdx = 0;
+            userData.altarScores.forEach((score, idx) => {
+                if (score > maxScore) {
+                    maxScore = score;
+                    bestIdx = idx;
+                }
+            });
+            userData.boxIdx = bestIdx;
+            showLoading(() => navigateTo(4));
+        }
+
+        function spawnChargeParticle(target, gathering) {
+            const p = document.createElement('div');
+            p.className = 'charge-particle';
+            const rect = target.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            
+            if (gathering) {
+                const angle = Math.random() * Math.PI * 2;
+                const dist = 60 + Math.random() * 40;
+                const startX = centerX + Math.cos(angle) * dist;
+                const startY = centerY + Math.sin(angle) * dist;
+                p.style.left = startX + 'px';
+                p.style.top = startY + 'px';
+                document.body.appendChild(p);
+                
+                p.animate([
+                    { transform: `translate(0, 0) scale(1.5)`, opacity: 0 },
+                    { opacity: 1, offset: 0.2 },
+                    { transform: `translate(${centerX - startX}px, ${centerY - startY}px) scale(0)`, opacity: 0 }
+                ], { duration: 500, easing: 'ease-in' }).onfinish = () => p.remove();
+            }
+        }
+
+        function triggerMilestoneFlash(el) {
+            playTone(400 + lastMilestone * 200, 'sine', 0.4, 0.2);
+            const flash = document.createElement('div');
+            flash.style.position = 'fixed'; flash.style.inset = '0';
+            flash.style.background = 'white'; flash.style.zIndex = '2000';
+            flash.style.pointerEvents = 'none'; flash.style.opacity = '0.2';
+            document.body.appendChild(flash);
+            flash.animate([{ opacity: 0.2 }, { opacity: 0 }], { duration: 300 }).onfinish = () => flash.remove();
+            
+            const baseX = parseFloat(el.dataset.baseX);
+            const baseY = parseFloat(el.dataset.baseY);
+            el.animate([
+                { transform: `translate(calc(-50% + ${baseX}px), calc(-50% + ${baseY}px)) scale(1.2)` },
+                { transform: `translate(calc(-50% + ${baseX}px), calc(-50% + ${baseY}px)) scale(1)` }
+            ], { duration: 200, easing: 'ease-out' });
+        }
+
+        function triggerExplosion(target) {
+            playTone(1000, 'square', 0.6, 0.1);
+            const rect = target.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+
+            for (let i = 0; i < 30; i++) {
+                const p = document.createElement('div');
+                p.className = 'charge-particle';
+                p.style.left = centerX + 'px';
+                p.style.top = centerY + 'px';
+                p.style.width = '5px'; p.style.height = '5px';
+                document.body.appendChild(p);
+                
+                const angle = Math.random() * Math.PI * 2;
+                const dist = 100 + Math.random() * 150;
+                p.animate([
+                    { transform: 'translate(0,0) scale(1)', opacity: 1 },
+                    { transform: `translate(${Math.cos(angle)*dist}px, ${Math.sin(angle)*dist}px) scale(0)`, opacity: 0 }
+                ], { duration: 800, easing: 'ease-out' }).onfinish = () => p.remove();
+            }
+        }
+
+        function showResult() {
+            const isl = userData.targetIsland || islandTypes[0];
+            document.getElementById('island-name').innerText = isl.name;
+            document.getElementById('island-theme-label').innerText = isl.themeName;
+            document.getElementById('island-desc').innerText = isl.desc;
+            document.getElementById('island-coord').innerText = `${Math.floor(Math.random()*180)}°E, ${Math.floor(Math.random()*90)}°N`;
+            document.getElementById('island-spirit').innerText = ['活跃', '静谧', '狂博', '复苏'][Math.floor(Math.random()*4)];
+            renderIslandSVG(isl);
+        }
+
+        function renderIslandSVG(isl) {
+            const vis = document.getElementById('island-visual'); vis.style.opacity = 1;
+            vis.innerHTML = `<svg viewBox="0 0 240 240" class="w-[480px] h-[480px] drop-shadow-[0_80px_120px_rgba(0,0,0,0.2)]"><defs><linearGradient id="g-base" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" style="stop-color: ${isl.color}" /><stop offset="100%" style="stop-color: ${isl.sec}" /></linearGradient></defs><path d="M40,160 Q120,205 200,160 L180,215 Q120,240 60,215 Z" fill="url(#g-base)" /><ellipse cx="120" cy="160" rx="90" ry="12" fill="${isl.color}" fill-opacity="0.9" /><g><path d="M80,160 L120,50 L160,160 Z" fill="${isl.color}" fill-opacity="0.6" /><path d="M120,160 L155,20 L195,160 Z" fill="${isl.color}" fill-opacity="0.3" /></g><text x="120" y="100" font-size="65" text-anchor="middle" dominant-baseline="middle">${isl.icon}</text></svg>`;
+        }
+
+        async function reifyStageOne(isCancel = false) {
+            const reifyBtn = document.getElementById('reify-btn');
+            const stereoBtn = document.getElementById('stereo-btn');
+            const cancelBtn = document.getElementById('cancel-stereo-btn');
+            const isl = userData.targetIsland || islandTypes[0];
+            const container = document.getElementById('reified-image');
+            if(!isCancel) { playClick(); reifyBtn.innerText = "✨ 正在感知画卷..."; }
+            setTimeout(() => {
+                let img = container.querySelector('img');
+                if(!img) { img = document.createElement('img'); img.className = "media-layer opacity-0"; img.src = isl.image; container.appendChild(img); }
+                img.onload = () => {
+                    document.getElementById('island-visual').style.opacity = 0; container.classList.remove('opacity-0'); img.style.opacity = "1";
+                    reifyBtn.classList.add('hidden'); stereoBtn.classList.remove('hidden'); cancelBtn.classList.add('hidden');
+                };
+            }, isCancel ? 0 : 1500);
+        }
+
+        async function reifyStageTwo() {
+            playClick(); // 保留点击音效
+            const stereoBtn = document.getElementById('stereo-btn');
+            const cancelBtn = document.getElementById('cancel-stereo-btn');
+            const isl = userData.targetIsland || islandTypes[0];
+            const targetVideoPath = isl.video;
+            const container = document.getElementById('reified-image');
+            
+            // 1. 立即更新按钮状态，提示用户正在加载
+            stereoBtn.innerText = "🌀 缓存中...";
+            stereoBtn.style.opacity = "0.7";
+            stereoBtn.style.pointerEvents = "none"; // 防止重复点击
+            
+            setTimeout(() => {
+                let video = container.querySelector('video');
+                if(!video) {
+                    video = document.createElement('video');
+                    video.className = "media-layer opacity-0"; // 初始透明
+                    video.loop = true;
+                    video.muted = false;
+                    video.volume = 1.0;
+                    video.playsInline = true;
+                    video.preload = "auto"; // 提示浏览器积极预加载
+                    video.style.background = "rgba(0,0,0,0.05)";
+                    container.appendChild(video);
+                }
+                
+                // 2. 关键：在设置 src 前，先绑定缓存就绪事件
+                video.oncanplaythrough = () => { // 当视频可以流畅播放时触发
+                    console.log('视频已缓存足够，开始播放');
+                    video.currentTime = 0;
+                    video.style.opacity = "1";
+                    const img = container.querySelector('img');
+                    if(img) img.style.opacity = "0";
+                    
+                    const playPromise = video.play();
+                    if (playPromise !== undefined) {
+                        playPromise.catch(e => {
+                            console.log("自动播放被阻止，等待用户交互:", e);
+                            video.muted = true;
+                            video.play();
+                        });
+                    }
+                    
+                    stereoBtn.classList.add('hidden');
+                    stereoBtn.innerText = "🌀 立体化画卷"; // 恢复原始文本
+                    stereoBtn.style.opacity = "1";
+                    stereoBtn.style.pointerEvents = "auto";
+                    cancelBtn.classList.remove('hidden');
+                };
+                
+                // 3. 绑定错误事件
+                video.onerror = (e) => {
+                    console.error('视频加载失败:', targetVideoPath, video.error);
+                    stereoBtn.innerText = "❌ 加载失败";
+                    stereoBtn.style.opacity = "1";
+                    stereoBtn.style.pointerEvents = "auto";
+                    showError(`视频加载失败，请检查网络或文件: ${isl.name}`);
+                };
+                
+                // 4. 绑定加载进度事件
+                video.onprogress = () => {
+                    // 可选：在这里显示缓冲进度
+                };
+                
+                // 5. 最后才设置 src，开始网络请求
+                video.src = targetVideoPath;
+                video.load();
+                
+            }, 300); // 保留一个短暂的延迟，让按钮状态变化能被用户感知
+        }
+
+        function goBack() { playClick(); if (currentStep > 0) navigateTo(currentStep - 1, 'back'); }
+        function reset() { location.reload(); }
+
+        function triggerRipple(direction = 'out') {
+            const container = document.getElementById('ripple-container'); playRippleSound();
+            for(let i = 0; i < 3; i++) {
+                setTimeout(() => {
+                    const rip = document.createElement('div'); rip.className = 'ripple';
+                    const size = 100 + (i * 60); rip.style.width = size + 'px'; rip.style.height = size + 'px';
+                    rip.style.animation = `${direction === 'out' ? 'ripple-out' : 'ripple-in'} ${direction === 'out' ? 2.2 : 1.4}s forwards`;
+                    container.appendChild(rip); setTimeout(() => rip.remove(), 2500);
+                }, i * 200); 
+            }
+        }
+
+        function startDestinyBubbles() {
+            const container = document.getElementById('bubble-container'); container.innerHTML = ''; const startTime = Date.now();
+            const spawn = () => {
+                const elapsed = Date.now() - startTime; if (elapsed > 5000 || currentStep < 4) return;
+                const ratio = 1 - (elapsed / 5000); const batchSize = Math.ceil(ratio * 8); 
+                for(let i=0; i < batchSize; i++) {
+                    const b = document.createElement('div'); b.className = 'bubble';
+                    const size = Math.random() * (110 * ratio + 30) + 20; const left = Math.random() * 100;
+                    const riseDuration = Math.random() * 3 + 3.5; const sway = (Math.random() - 0.5) * 220;
+                    const blurValue = Math.random() * 6 + 2; b.style.width = `${size}px`; b.style.height = `${size}px`; b.style.left = `${left}%`;
+                    b.style.filter = `blur(${blurValue}px)`; b.style.setProperty('--sway', `${sway}px`); 
+                    b.style.animation = `bubble-rise ${riseDuration}s cubic-bezier(0.4, 0, 0.2, 1) forwards`;
+                    container.appendChild(b); setTimeout(() => { if(b.parentNode) b.remove(); }, riseDuration * 1000);
+                }
+                setTimeout(spawn, 90 + (1 - ratio) * 500);
+            };
+            spawn();
+        }
+
+        function playRippleSound() {
+            if (!audioCtx) return;
+            const duration = 1.8, now = audioCtx.currentTime;
+            const bufferSize = audioCtx.sampleRate * duration, buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+            const data = buffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+            const noise = audioCtx.createBufferSource(); noise.buffer = buffer;
+            const filter = audioCtx.createBiquadFilter(); filter.type = 'lowpass';
+            filter.frequency.setValueAtTime(600, now); filter.frequency.exponentialRampToValueAtTime(300, now + duration);
+            const gain = audioCtx.createGain();
+            gain.gain.setValueAtTime(0, now); gain.gain.linearRampToValueAtTime(0.5, now + 0.3); gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+            noise.connect(filter); filter.connect(gain); gain.connect(audioCtx.destination);
+            noise.start(now); noise.stop(now + duration);
+        }
+
+        function playClick() { 
+            if (!audioCtx) return; 
+            const osc = audioCtx.createOscillator(), g = audioCtx.createGain(); 
+            osc.frequency.setValueAtTime(1500, audioCtx.currentTime); 
+            g.gain.setValueAtTime(0.1, audioCtx.currentTime); 
+            g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.15); 
+            osc.connect(g); g.connect(audioCtx.destination); 
+            osc.start(); osc.stop(audioCtx.currentTime + 0.15); 
+        }
+
+        function initStars() { const group = document.getElementById('stars-group'); for(let i=0; i<100; i++) { const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle"); circle.setAttribute("cx", Math.random() * 1000); circle.setAttribute("cy", Math.random() * 400); circle.setAttribute("r", Math.random() * 1.5); circle.setAttribute("fill", "white"); circle.setAttribute("opacity", Math.random()); group.appendChild(circle); } }
+    </script>
+</body>
+</html>
