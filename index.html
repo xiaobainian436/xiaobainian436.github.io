@@ -410,7 +410,7 @@
 
         #altar-confirm-btn {
             position: absolute;
-            bottom: -30px; /* 位置回归上一版本 */
+            bottom: -50px; /* 位置稍微下移 */
             left: 50%;
             transform: translateX(-50%);
             opacity: 0.25; /* 默认可见但半透明 */
@@ -701,7 +701,7 @@
             { id: 'starry_field', name: '幽昙星原', theme: 'mystic', themeName: '粉紫：梦幻与幽秘', color: '#a855f7', sec: '#581c87', icon: '✨', desc: '一种如玉昙般的巨大花朵在夜晚集体绽放，散发出星辉般的淡紫光芒，将草原点缀成星空倒影。', image: 'https://cdn.jsdelivr.net/gh/xiaobainian436/xiaobainian436.github.io@main/youtanxingyuan.png', video: 'https://cdn.jsdelivr.net/gh/xiaobainian436/xiaobainian436.github.io@main/youtanxingyuan.mp4' },
             { id: 'dream_mist', name: '绮梦雾海', theme: 'mystic', themeName: '粉紫：梦幻与幽秘', color: '#d946ef', sec: '#701a75', icon: '🌫️', desc: '永续的淡紫色薄雾笼罩岛屿，其中生长着巨大的发光花卉，虚实难辨，仿佛行走在他人梦中。', image: 'https://cdn.jsdelivr.net/gh/xiaobainian436/xiaobainian436.github.io@main/qimengwuhai.png', video: 'https://cdn.jsdelivr.net/gh/xiaobainian436/xiaobainian436.github.io@main/qimengwuhai.mp4' },
             { id: 'floating_forest', name: '森息浮屿', theme: 'nature', themeName: '绿色：生机与秘境', color: '#10b981', sec: '#064e3b', icon: '🌿', desc: '由盘根错节的古树根系托起的空中森林岛屿，云雾缭绕，是气息绵长的生命净土。', image: 'https://cdn.jsdelivr.net/gh/xiaobainian436/xiaobainian436.github.io@main/senxifuyu.png', video: 'https://cdn.jsdelivr.net/gh/xiaobainian436/xiaobainian436.github.io@main/senxifuyu.mp4' },
-            { id: 'melody_prairie', name: '千籁草原', theme: 'nature', themeName: '绿色：生机与秘境', color: '#84cc16', sec: '#365314', icon: '🍃', desc: '每一片草叶都能在风中发出细微乐音，整片草原就是活的乐器，奏响永不停息的自然交响诗。', image: 'https://cdn.jsdelivr.net/gh/xiaobainian436/xiaobainian436.github.io@main/qianlaicaoyuan.png', video: 'https://cdn.jsdelivr.net/gh/xiaobainian436/xiaobainian436.github.io@main/qianlaicaoyuan.mp4' },
+            { id: 'melody_prairie', name: '千籁草原', theme: 'nature', themeName: '绿色：生机与秘境', color: '#84cc16', sec: '#365314', icon: '🍃', desc: '每一片草叶都能在风中发出细微乐音，整片草原就是活的乐器，奏响永不停息的自然交响诗。', image: 'https://cdn.jsdelivr.net/gh/xiaobainian436/xiaobainian436.github.io@main/qianlaicaoyuan.jpg', video: 'https://cdn.jsdelivr.net/gh/xiaobainian436/xiaobainian436.github.io@main/qianlaicaoyuan.mp4' },
             { id: 'ice_abyss', name: '永寂冰渊', theme: 'cool', themeName: '蓝色：凛冽与深邃', color: '#3b82f6', sec: '#1e3a8a', icon: '❄️', desc: '巨大的蓝色冰川内部空腔世界，时间仿佛冻结，唯有幽蓝冰光与深海回响，寂静而神圣。', image: 'https://cdn.jsdelivr.net/gh/xiaobainian436/xiaobainian436.github.io@main/yongjibingyuan.png', video: 'https://cdn.jsdelivr.net/gh/xiaobainian436/xiaobainian436.github.io@main/yongjibingyuan.mp4' },
             { id: 'azure_steps', name: '沧澜云阶', theme: 'cool', themeName: '蓝色：凛冽与深邃', color: '#0ea5e9', sec: '#0c4a6e', icon: '☁️', desc: '海水蒸腾为蓝色云雾，化作连接天地的流动阶梯。', image: 'https://cdn.jsdelivr.net/gh/xiaobainian436/xiaobainian436.github.io@main/canglanyunjie.png', video: 'https://cdn.jsdelivr.net/gh/xiaobainian436/xiaobainian436.github.io@main/canglanyunjie.mp4' },
             { id: 'tidal_crown', name: '汐语之冠', theme: 'cool', themeName: '蓝色：凛冽与深邃', color: '#06b6d4', sec: '#164e63', icon: '🌊', desc: '潮汐穿过天然冠冕般的山体，鸣响如大海呼吸的韵律。', image: 'https://cdn.jsdelivr.net/gh/xiaobainian436/xiaobainian436.github.io@main/xiyuzhiguan.png', video: 'https://cdn.jsdelivr.net/gh/xiaobainian436/xiaobainian436.github.io@main/xiyuzhiguan.mp4' }
@@ -1627,14 +1627,34 @@
             const cancelBtn = document.getElementById('cancel-stereo-btn');
             const isl = userData.targetIsland || islandTypes[0];
             const container = document.getElementById('reified-image');
-            if(!isCancel) { playClick(); reifyBtn.innerText = "✨ 正在感知画卷..."; }
+            
+            if(!isCancel) { 
+                playClick(); 
+                reifyBtn.innerText = "✨ 正在感知画卷..."; 
+            } else {
+                playClick();
+                // 恢复逻辑：停止并隐藏视频
+                const video = container.querySelector('video');
+                if(video) {
+                    video.pause();
+                    video.style.opacity = "0";
+                }
+            }
+
             setTimeout(() => {
                 let img = container.querySelector('img');
                 if(!img) { img = document.createElement('img'); img.className = "media-layer opacity-0"; img.src = isl.image; container.appendChild(img); }
-                img.onload = () => {
-                    document.getElementById('island-visual').style.opacity = 0; container.classList.remove('opacity-0'); img.style.opacity = "1";
-                    reifyBtn.classList.add('hidden'); stereoBtn.classList.remove('hidden'); cancelBtn.classList.add('hidden');
+                
+                const showImage = () => {
+                    document.getElementById('island-visual').style.opacity = 0; 
+                    container.classList.remove('opacity-0'); 
+                    img.style.opacity = "1";
+                    reifyBtn.classList.add('hidden'); 
+                    stereoBtn.classList.remove('hidden'); 
+                    cancelBtn.classList.add('hidden');
                 };
+
+                if(img.complete) showImage(); else img.onload = showImage;
             }, isCancel ? 0 : 1500);
         }
 
@@ -1698,12 +1718,7 @@
                     showError(`视频加载失败，请检查网络或文件: ${isl.name}`);
                 };
                 
-                // 4. 绑定加载进度事件
-                video.onprogress = () => {
-                    // 可选：在这里显示缓冲进度
-                };
-                
-                // 5. 最后才设置 src，开始网络请求
+                // 4. 最后才设置 src，开始网络请求
                 video.src = targetVideoPath;
                 video.load();
                 
@@ -1772,4 +1787,3 @@
         function initStars() { const group = document.getElementById('stars-group'); for(let i=0; i<100; i++) { const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle"); circle.setAttribute("cx", Math.random() * 1000); circle.setAttribute("cy", Math.random() * 400); circle.setAttribute("r", Math.random() * 1.5); circle.setAttribute("fill", "white"); circle.setAttribute("opacity", Math.random()); group.appendChild(circle); } }
     </script>
 </body>
-</html>
