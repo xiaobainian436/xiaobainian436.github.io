@@ -7,12 +7,12 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         :root {
-            /* 默认低饱和蓝色背景变量 */
-            --bg-c1: #1e293b;
-            --bg-c2: #334155;
-            --bg-c3: #2c3e50;
-            --bg-c4: #1a202c;
-            --step0-grad: linear-gradient(to bottom, #020617, #0f172a);
+            /* 默认低饱和蓝色背景变量 - 已进一步降低饱和度，采用更深邃的烟灰蓝调 */
+            --bg-c1: #475569; /* 较亮 烟灰蓝 */
+            --bg-c2: #334155; /* 中等 */
+            --bg-c3: #1e293b; /* 深色 */
+            --bg-c4: #0f172a; /* 极深 */
+            --step0-grad: linear-gradient(to bottom, #334155, #0f172a);
         }
 
         @keyframes spin-reverse { from { transform: rotate(360deg); } to { transform: rotate(0deg); } }
@@ -26,7 +26,7 @@
         }
         .animate-flare { animation: flare-breathe 4s ease-in-out infinite; }
 
-        /* 新增：环境光团与气泡动画 */
+        /* 环境光团与气泡动画 */
         @keyframes ambient-blob {
             0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.4; }
             50% { transform: translate(-30px, 40px) scale(1.15); opacity: 0.7; }
@@ -72,28 +72,28 @@
         }
 
         body { 
-            background-color: #0f172a;
+            background-color: #020617;
             color: white; 
             overflow-x: hidden; 
             font-family: system-ui, -apple-system, sans-serif; 
             margin: 0; padding: 0; min-height: 100vh;
         }
 
-        /* 层级调整：几何背景 z-index 设为最底 */
+        /* 几何背景 */
         #bg-canvas, #bg-final, #step0-bg, #deconstructed-bg-canvas { position: fixed; inset: 0; pointer-events: none; }
         #bg-canvas {
             z-index: -5; 
+            background-color: var(--bg-c4);
             background-image: 
-                radial-gradient(circle at 20% 30%, var(--bg-c1) 0%, transparent 50%),
-                radial-gradient(circle at 80% 20%, var(--bg-c2) 0%, transparent 50%),
-                radial-gradient(circle at 40% 80%, var(--bg-c3) 0%, transparent 60%),
-                radial-gradient(circle at 90% 90%, var(--bg-c4) 0%, transparent 40%);
+                radial-gradient(circle at 20% 30%, var(--bg-c1) 0%, transparent 70%),
+                radial-gradient(circle at 80% 20%, var(--bg-c2) 0%, transparent 70%),
+                radial-gradient(circle at 40% 80%, var(--bg-c3) 0%, transparent 70%),
+                radial-gradient(circle at 90% 90%, var(--bg-c4) 0%, transparent 70%);
             background-size: 200% 200%;
             animation: mesh-motion 25s ease-in-out infinite;
-            transition: opacity 1.8s ease-in-out, background-image 2.5s ease-in-out;
+            transition: opacity 1.8s ease-in-out, background-image 2.5s ease-in-out, background-color 2.5s ease-in-out;
         }
 
-        /* 果冻球画布：设为底层，仅在几何背景之上 */
         #deconstructed-bg-canvas {
             z-index: -4;
             opacity: 0;
@@ -105,7 +105,6 @@
             filter: blur(0px);
         }
 
-        /* 毛玻璃图层：覆盖在果冻球和背景之上 */
         #glass-overlay {
             position: fixed; inset: 0; z-index: -3;
             backdrop-filter: blur(24px) saturate(140%);
@@ -116,7 +115,6 @@
         }
         #glass-overlay.active { opacity: 1; }
 
-        /* 修改后的 Step 0 背景容器 */
         #step0-bg {
             z-index: -2;
             opacity: 0;
@@ -276,7 +274,7 @@
 
         .media-layer { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: opacity 2s ease-in-out; pointer-events: none; }
 
-        /* 镌刻菜单 - 优化缩小不露怯 */
+        /* 镌刻菜单 */
         #topology-menu {
             position: fixed;
             background: rgba(30, 41, 59, 0.7);
@@ -434,10 +432,10 @@
 
         #altar-confirm-btn {
             position: absolute;
-            bottom: -75px; /* 下移位置，防止重叠 */
+            bottom: -75px;
             left: 50%;
             transform: translateX(-50%);
-            opacity: 0.25; /* 默认可见但半透明 */
+            opacity: 0.25;
             transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.4s ease;
             pointer-events: none;
             cursor: pointer;
@@ -459,6 +457,28 @@
             pointer-events: none;
             z-index: 60000;
             filter: drop-shadow(0 0 6px white);
+        }
+
+        /* 新增：总结模块样式 */
+        .summary-card {
+            background: rgba(0, 0, 0, 0.03);
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            transition: all 0.4s ease;
+        }
+        .summary-card:hover {
+            background: rgba(0, 0, 0, 0.05);
+            transform: translateY(-2px);
+        }
+        .summary-tag {
+            padding: 0.25rem 0.6rem;
+            background: rgba(0, 0, 0, 0.06);
+            border-radius: 0.5rem;
+            font-size: 10px;
+            color: rgba(0, 0, 0, 0.6);
+            display: inline-block;
+            margin: 0.2rem;
         }
     </style>
 </head>
@@ -501,17 +521,16 @@
 
     <div id="init-white-mask"></div>
 
-    <!-- 修改后的地质溯源背景：移除星空，添加泡泡与环境色块效果 -->
     <div id="step0-bg">
-        <div class="absolute inset-0 bg-[#0f172a]">
+        <div class="absolute inset-0 bg-transparent">
             <!-- 环境光团效果 -->
-            <div class="absolute top-[20%] right-[10%] w-[400px] h-[400px] bg-blue-500/10 rounded-full blur-[120px] ambient-blob"></div>
-            <div class="absolute bottom-[10%] left-[20%] w-[350px] h-[350px] bg-indigo-500/10 rounded-full blur-[100px] ambient-blob" style="animation-delay: -5s;"></div>
+            <div class="absolute top-[20%] right-[10%] w-[400px] h-[400px] bg-white/5 rounded-full blur-[120px] ambient-blob"></div>
+            <div class="absolute bottom-[10%] left-[20%] w-[350px] h-[350px] bg-white/5 rounded-full blur-[100px] ambient-blob" style="animation-delay: -5s;"></div>
             
             <!-- 动态果冻气泡层 -->
             <div id="glass-bubbles" class="absolute inset-0 pointer-events-none transition-opacity duration-1000">
                 <div class="absolute top-[15%] left-[10%] w-72 h-72 rounded-full border border-white/20 bg-gradient-to-br from-white/10 to-transparent backdrop-blur-md animate-jelly-bubble shadow-[0_0_40px_rgba(255,255,255,0.05)]"></div>
-                <div class="absolute bottom-[10%] right-[15%] w-96 h-96 rounded-full border border-white/10 bg-gradient-to-tr from-blue-400/10 to-transparent backdrop-blur-xl animate-jelly-bubble shadow-[0_0_60px_rgba(59,130,246,0.1)]" style="animation-delay: -5s;"></div>
+                <div class="absolute bottom-[10%] right-[15%] w-96 h-96 rounded-full border border-white/10 bg-gradient-to-tr from-white/10 to-transparent backdrop-blur-xl animate-jelly-bubble shadow-[0_0_60px_rgba(255,255,255,0.1)]" style="animation-delay: -5s;"></div>
                 <div class="absolute top-[60%] left-[35%] w-40 h-40 rounded-full border border-white/30 bg-white/5 backdrop-blur-sm animate-jelly-bubble shadow-[0_0_20px_rgba(255,255,255,0.1)]" style="animation-delay: -10s;"></div>
             </div>
         </div>
@@ -519,7 +538,6 @@
 
     <div id="bg-canvas"></div>
     <div id="bg-final"></div>
-    <!-- 统一底层的果冻球与毛玻璃图层 -->
     <canvas id="deconstructed-bg-canvas"></canvas>
     <div id="glass-overlay"></div>
 
@@ -557,9 +575,7 @@
 
     <!-- 转场副本界面 -->
     <div id="note-transition-overlay">
-        <!-- 海浪层容器 -->
         <div id="wave-layers-container"></div>
-        
         <div id="destiny-note">
             <p id="note-content"></p>
             <div class="mt-12 flex flex-col gap-5">
@@ -604,6 +620,7 @@
             </div>
         </div>
 
+        <!-- Step 0 -->
         <div id="step-0" class="step-container flex-col items-center space-y-12">
             <div class="text-center space-y-4">
                 <h1 class="text-5xl font-extralight tracking-[0.4em] uppercase">地质溯源</h1>
@@ -645,6 +662,7 @@
             </div>
         </div>
 
+        <!-- Step 1 -->
         <div id="step-1" class="step-container flex-col items-center space-y-16">
             <h2 class="text-4xl font-extralight tracking-[0.4em] uppercase">气候仪式</h2>
             <div class="w-[520px] space-y-12">
@@ -653,6 +671,7 @@
             </div>
         </div>
 
+        <!-- Step 2 -->
         <div id="step-2" class="step-container flex-col items-center space-y-16">
             <h2 class="text-4xl font-extralight tracking-[0.4em] uppercase text-white/80">人生地形</h2>
             <div class="relative w-[520px] h-[520px] border border-white/10 rounded-[5rem] bg-white/[0.02] shadow-2xl" id="topology-box" style="overflow: visible;">
@@ -665,6 +684,7 @@
             <button id="topo-activate-btn" onclick="triggerStep2Process()" class="px-20 py-5 bg-white/5 border border-white/10 text-white/20 rounded-full text-[10px] tracking-[0.8em] font-bold uppercase transition-all shadow-xl pointer-events-none">激活逻辑地形</button>
         </div>
 
+        <!-- Step 3 -->
         <div id="step-3" class="step-container w-full h-screen flex-col items-center justify-center bg-transparent overflow-hidden" onmousemove="handleJellyFollow(event)">
             <div class="relative w-[700px] h-[700px]">
                 <div class="orbital-line w-[620px] h-[620px]"></div><div class="orbital-line w-[480px] h-[480px] opacity-50"></div>
@@ -678,20 +698,55 @@
             </div>
         </div>
 
+        <!-- Step 4 (Result) -->
         <div id="step-4" class="step-container w-full max-w-7xl flex-col items-center justify-center min-h-screen py-24 reveal-anim">
             <div class="absolute top-12 left-12 flex items-center gap-6 opacity-30"><div class="w-20 h-[1px] bg-current"></div><span class="text-[11px] tracking-[0.6em] uppercase font-bold text-current">Life Island // Project Destiny</span></div>
-            <div class="grid grid-cols-1 lg:grid-cols-12 w-full items-center gap-20 px-12 relative z-10 -translate-y-12">
-                <div class="lg:col-span-4 lg:text-left text-center space-y-10">
+            <div class="grid grid-cols-1 lg:grid-cols-12 w-full items-start gap-20 px-12 relative z-10">
+                <div class="lg:col-span-5 lg:text-left text-center space-y-12 h-full overflow-y-auto pr-4 scroll-smooth">
                     <div class="space-y-4">
                         <p id="island-theme-label" class="opacity-40 text-[12px] tracking-[0.5em] uppercase font-light"></p>
                         <h2 id="island-name" class="text-7xl font-extralight tracking-tighter architectural heading-[1.1] italic">...</h2>
                     </div>
                     <div class="space-y-6">
-                        <p id="island-desc" class="opacity-70 font-light text-base leading-relaxed italic max-w-sm"></p>
+                        <p id="island-desc" class="opacity-70 font-light text-base leading-relaxed italic max-w-lg"></p>
                     </div>
-                    <div class="flex flex-col gap-6 text-[11px] tracking-[0.3em] opacity-40 font-mono"><div>COORD <span id="island-coord">SCANNING...</span></div><div>SPIRIT <span id="island-spirit">SLEEPING...</span></div></div>
+                    
+                    <div class="flex flex-wrap gap-8 text-[11px] tracking-[0.3em] opacity-40 font-mono uppercase">
+                        <div>COORD <span id="island-coord">SCANNING...</span></div>
+                        <div>SPIRIT <span id="island-spirit">SLEEPING...</span></div>
+                    </div>
+
+                    <!-- 新增：总结与感悟 -->
+                    <div id="result-summary" class="summary-card space-y-8 mt-12">
+                        <h3 class="text-[11px] tracking-[0.8em] uppercase font-bold text-black/30 mb-6">溯源与轨迹 // Summary</h3>
+                        
+                        <div class="space-y-4">
+                            <div class="flex items-start gap-4">
+                                <span class="w-16 flex-shrink-0 text-[10px] text-black/40 font-bold">起源信物</span>
+                                <div id="summary-tokens" class="flex flex-wrap gap-1"></div>
+                            </div>
+                            <div class="flex items-start gap-4">
+                                <span class="w-16 flex-shrink-0 text-[10px] text-black/40 font-bold">核心仪式</span>
+                                <div id="summary-ritual" class="text-[11px] text-black/70"></div>
+                            </div>
+                            <div class="flex items-start gap-4">
+                                <span class="w-16 flex-shrink-0 text-[10px] text-black/40 font-bold">生命痕迹</span>
+                                <div id="summary-traces" class="text-[11px] text-black/70 italic"></div>
+                            </div>
+                            <div class="flex items-start gap-4">
+                                <span class="w-16 flex-shrink-0 text-[10px] text-black/40 font-bold">初始潜能</span>
+                                <div id="summary-potential" class="flex flex-wrap gap-1"></div>
+                            </div>
+                        </div>
+
+                        <div class="pt-6 border-t border-black/10">
+                            <p class="text-[10px] uppercase tracking-[0.4em] text-black/30 font-bold mb-3">命运洞见 // Reflection</p>
+                            <p id="summary-insight" class="text-[13px] leading-relaxed text-black/60 font-light italic"></p>
+                        </div>
+                    </div>
                 </div>
-                <div class="lg:col-span-8 relative flex flex-col items-center justify-center min-h-[750px]">
+
+                <div class="lg:col-span-7 relative flex flex-col items-center justify-center min-h-[750px]">
                     <div id="visual-frame" class="relative group w-full flex justify-center items-center h-[550px]">
                         <div id="reified-image" class="absolute inset-0 z-20 rounded-full overflow-hidden opacity-0 transition-opacity duration-[2s] border-[12px] border-white shadow-2xl scale-[1.05]"></div>
                         <div id="island-visual" class="relative z-10 scale-[1.1] animate-float-large transition-all duration-[2.5s]"></div>
@@ -747,7 +802,6 @@
                 if(mask) mask.style.opacity = '0';
                 setTimeout(() => { hg.style.display = 'none'; navigateTo(0); }, 1500);
             }, 5000); 
-            // 移除了 initStars 调用
         };
 
         function unlockAudio() {
@@ -841,31 +895,33 @@
                     userData.hasImageToken = true; 
                     processImageForBackground(file);
                 } else {
-                    // 如果不是图片，也要更新状态
                     updateProceedState();
                 }
                 playClick(); 
             }
         }
 
+        /**
+         * 核心修改：大幅降低颜色饱和度，使用莫兰迪灰调色系
+         */
         function updateGlobalThemeColors(theme) {
             const root = document.documentElement;
             const themes = {
                 'warm': { 
-                    'c1': '#450a0a', 'c2': '#7f1d1d', 'c3': '#991b1b', 'c4': '#1a0505',
-                    'grad': 'linear-gradient(to bottom, #2d0606, #0f0505)'
+                    'c1': '#c5a5a5', 'c2': '#8a6d6d', 'c3': '#5a4444', 'c4': '#2e2222',
+                    'grad': 'linear-gradient(to bottom, #8a6d6d, #2e2222)'
                 },
                 'nature': { 
-                    'c1': '#064e3b', 'c2': '#065f46', 'c3': '#14532d', 'c4': '#020f0a',
-                    'grad': 'linear-gradient(to bottom, #04241a, #020f0a)'
+                    'c1': '#a5c5b5', 'c2': '#6d8a7c', 'c3': '#445a4e', 'c4': '#222e28',
+                    'grad': 'linear-gradient(to bottom, #6d8a7c, #222e28)'
                 },
                 'mystic': { 
-                    'c1': '#4c1d95', 'c2': '#701a75', 'c3': '#831843', 'c4': '#1a021a',
-                    'grad': 'linear-gradient(to bottom, #240b36, #0f021a)'
+                    'c1': '#b5a5c5', 'c2': '#7c6d8a', 'c3': '#4e445a', 'c4': '#28222e',
+                    'grad': 'linear-gradient(to bottom, #7c6d8a, #28222e)'
                 },
                 'cool': { 
-                    'c1': '#1e3a8a', 'c2': '#1e40af', 'c3': '#111827', 'c4': '#02051a',
-                    'grad': 'linear-gradient(to bottom, #020617, #0f172a)'
+                    'c1': '#a5b5c5', 'c2': '#6d7c8a', 'c3': '#444e5a', 'c4': '#22282e',
+                    'grad': 'linear-gradient(to bottom, #6d7c8a, #22282e)'
                 }
             };
             
@@ -880,19 +936,16 @@
         async function processImageForBackground(file) {
             const img = new Image(); img.src = URL.createObjectURL(file); await img.decode();
             const offCanvas = document.createElement('canvas'); const offCtx = offCanvas.getContext('2d');
-            // 采样率略微提高，以获得更好的色彩匹配
             offCanvas.width = 60; offCanvas.height = 60; offCtx.drawImage(img, 0, 0, 60, 60);
             const pixelData = offCtx.getImageData(0, 0, 60, 60).data;
             const colors = []; let totalR = 0, totalG = 0, totalB = 0;
             for (let i = 0; i < pixelData.length; i += 4) {
                 const r = pixelData[i], g = pixelData[i+1], b = pixelData[i+2];
                 totalR += r; totalG += g; totalB += b;
-                // 采集具有代表性的色彩
                 if (i % 32 === 0) colors.push({ r, g, b });
             }
             const avgR = totalR / (60*60), avgG = totalG / (60*60), avgB = totalB / (60*60);
             
-            // 判定主题方向
             if (avgR > 210 && avgG > 210 && avgB > 210) { userData.themeDirection = 'cool'; } 
             else if (avgB > avgR && avgB > avgG) { userData.themeDirection = 'cool'; } 
             else if (avgG >= avgR && avgG > avgB) { userData.themeDirection = 'nature'; } 
@@ -903,13 +956,11 @@
             updateGlobalThemeColors(userData.themeDirection);
             userData.imageColors = colors; 
             
-            // 立即让画布渐入
             const canvas = document.getElementById('deconstructed-bg-canvas');
             const glass = document.getElementById('glass-overlay');
             canvas.classList.add('revealed');
             glass.classList.add('active');
             
-            // 初始化并启动背景果冻物理系统
             initBackgroundObjects();
             updateProceedState();
         }
@@ -921,21 +972,18 @@
             const canvas = document.getElementById('deconstructed-bg-canvas');
             
             for(let i=0; i<count; i++) {
-                // 直接从采样池中抓取颜色，确保与图片呼应
                 const colorObj = colors[Math.floor(Math.random() * colors.length)];
-                
                 const radius = 100 + Math.random() * 120; 
                 userData.bgObjects.push({
                     x: radius + Math.random() * (canvas.width - radius * 2),
                     y: radius + Math.random() * (canvas.height - radius * 2),
-                    // 初始速度提升至 1.2 - 1.8 范围，响应上传时的“冲击”
                     vx: (Math.random() > 0.5 ? 1 : -1) * (1.2 + Math.random() * 0.6),
                     vy: (Math.random() > 0.5 ? 1 : -1) * (1.2 + Math.random() * 0.6),
                     radius: radius,
                     mass: radius * 1.5,
                     color: { r: colorObj.r, g: colorObj.g, b: colorObj.b },
-                    opacity: 0.12 + Math.random() * 0.12, // 保持通透感
-                    elasticity: 0.88 // 强力回弹且带有一丝软糯
+                    opacity: 0.12 + Math.random() * 0.12,
+                    elasticity: 0.88
                 });
             }
             if(!bgAnimId) startBackgroundAnimation();
@@ -950,19 +998,16 @@
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 
                 const objs = userData.bgObjects;
-
                 for (let i = 0; i < objs.length; i++) {
                     const obj = objs[i];
                     obj.x += obj.vx;
                     obj.y += obj.vy;
 
-                    // 边界碰撞
                     if (obj.x - obj.radius < 0) { obj.x = obj.radius; obj.vx *= -obj.elasticity; }
                     if (obj.x + obj.radius > canvas.width) { obj.x = canvas.width - obj.radius; obj.vx *= -obj.elasticity; }
                     if (obj.y - obj.radius < 0) { obj.y = obj.radius; obj.vy *= -obj.elasticity; }
                     if (obj.y + obj.radius > canvas.height) { obj.y = canvas.height - obj.radius; obj.vy *= -obj.elasticity; }
 
-                    // 内部球体碰撞
                     for (let j = i + 1; j < objs.length; j++) {
                         const other = objs[j];
                         const dx = other.x - obj.x;
@@ -974,21 +1019,17 @@
                             const angle = Math.atan2(dy, dx);
                             const sin = Math.sin(angle);
                             const cos = Math.cos(angle);
-
                             const vx1 = obj.vx * cos + obj.vy * sin;
                             const vy1 = obj.vy * cos - obj.vx * sin;
                             const vx2 = other.vx * cos + other.vy * sin;
                             const vy2 = other.vy * cos - other.vx * sin;
-
                             const vx1Final = ((obj.mass - other.mass) * vx1 + 2 * other.mass * vx2) / (obj.mass + other.mass) * obj.elasticity;
                             const vx2Final = ((other.mass - obj.mass) * vx2 + 2 * other.mass * vx1) / (obj.mass + other.mass) * obj.elasticity;
-
                             const overlap = minDistance - distance;
                             obj.x -= (overlap * cos) / 2;
                             obj.y -= (overlap * sin) / 2;
                             other.x += (overlap * cos) / 2;
                             other.y += (overlap * sin) / 2;
-
                             obj.vx = vx1Final * cos - vy1 * sin;
                             obj.vy = vy1 * cos + vx1Final * sin;
                             other.vx = vx2Final * cos - vy2 * sin;
@@ -996,36 +1037,20 @@
                         }
                     }
 
-                    // 渲染高感质果冻泡泡球
                     ctx.save();
                     const radialGrad = ctx.createRadialGradient(
                         obj.x - obj.radius * 0.35, obj.y - obj.radius * 0.35, obj.radius * 0.05,
                         obj.x, obj.y, obj.radius
                     );
-                    
                     const r = obj.color.r, g = obj.color.g, b = obj.color.b;
                     const colorStr = `rgba(${r},${g},${b},${obj.opacity})`;
                     const darkColor = `rgba(${Math.floor(r*0.7)},${Math.floor(g*0.7)},${Math.floor(b*0.7)},${obj.opacity*1.1})`;
-                    
                     radialGrad.addColorStop(0, `rgba(255,255,255,${obj.opacity + 0.2})`); 
                     radialGrad.addColorStop(0.15, colorStr);
                     radialGrad.addColorStop(1, darkColor); 
-                    
                     ctx.fillStyle = radialGrad;
                     ctx.beginPath();
                     ctx.arc(obj.x, obj.y, obj.radius, 0, Math.PI * 2);
-                    ctx.fill();
-                    
-                    // 核心受光面高光
-                    ctx.beginPath();
-                    const highlight = ctx.createRadialGradient(
-                        obj.x - obj.radius * 0.4, obj.y - obj.radius * 0.4, 0,
-                        obj.x - obj.radius * 0.4, obj.y - obj.radius * 0.4, obj.radius * 0.3
-                    );
-                    highlight.addColorStop(0, 'rgba(255,255,255,0.3)');
-                    highlight.addColorStop(1, 'rgba(255,255,255,0)');
-                    ctx.fillStyle = highlight;
-                    ctx.arc(obj.x - obj.radius * 0.4, obj.y - obj.radius * 0.4, obj.radius * 0.3, 0, Math.PI * 2);
                     ctx.fill();
                     ctx.restore();
                 }
@@ -1591,6 +1616,34 @@
             document.getElementById('island-coord').innerText = `${Math.floor(Math.random()*180)}°E, ${Math.floor(Math.random()*90)}°N`;
             document.getElementById('island-spirit').innerText = ['活跃', '静谧', '狂博', '复苏'][Math.floor(Math.random()*4)];
             renderIslandSVG(isl);
+            
+            // 填充总结内容
+            const tokenList = userData.tokenFiles.filter(f => f).map(f => f.name);
+            document.getElementById('summary-tokens').innerHTML = tokenList.length > 0 ? 
+                tokenList.map(name => `<span class="summary-tag">${name}</span>`).join('') : 
+                '<span class="opacity-30">未投放信物</span>';
+            
+            document.getElementById('summary-ritual').innerText = userData.answers[0] || '未选择';
+            
+            const traceList = userData.destinyNodes.map(n => n.text);
+            document.getElementById('summary-traces').innerText = traceList.length > 0 ? 
+                traceList.join(' · ') : '未镌刻痕迹';
+            
+            const potentialLabels = ['厚爱', '家境', '体魄', '心性', '智力', '容貌'];
+            document.getElementById('summary-potential').innerHTML = userData.altarScores.map((score, i) => {
+                if (score === 0) return '';
+                const stars = '★'.repeat(score) + '☆'.repeat(4-score);
+                return `<div class="w-full flex justify-between gap-4 text-[10px]"><span class="opacity-50">${potentialLabels[i]}</span><span class="font-mono text-black/40">${stars}</span></div>`;
+            }).join('') || '<span class="opacity-30">未觉醒潜能</span>';
+
+            // 生成专属感悟
+            const insightMap = {
+                'warm': '炽热的不仅是熔岩，更是你镌刻在生命里的不灭意志。',
+                'mystic': '在梦境与现实的交界处，你选择用直觉去触碰命运的纹理。',
+                'nature': '大地听见了你的呼吸，每一串生机的跳动都是自然的致谢。',
+                'cool': '凛冽的深邃并非寒冷，而是极致理智下的万物归一。'
+            };
+            document.getElementById('summary-insight').innerText = insightMap[isl.theme] || '命运的画卷已然展开，每一次选择都化作了此岸。';
         }
 
         function renderIslandSVG(isl) {
@@ -1658,7 +1711,6 @@
         }
 
         function playClick() { if (!audioCtx) return; const osc = audioCtx.createOscillator(), g = audioCtx.createGain(); osc.frequency.setValueAtTime(1500, audioCtx.currentTime); g.gain.setValueAtTime(0.1, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.15); osc.connect(g); g.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + 0.15); }
-        // 移除了 initStars 定义
     </script>
 </body>
 </html>
