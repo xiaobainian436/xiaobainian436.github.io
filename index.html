@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>人生岛屿盲盒</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@200;300;400;700&family=Playfair+Display:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-kandinsky: #e6e2d3;
+            --bg-kandinsky-expanded: #f2f0e9;
+            --bg-glass: #121826;
+            --bg-glass-expanded: #0a0f1a;
+            --title-kandinsky: #5e4545;
+            --sub-kandinsky: #7d6666;
+        }
+
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #09090b;
+            color: white;
+            font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+
+        .serif-title {
+            font-family: 'Noto Serif SC', 'Playfair Display', serif;
+            font-weight: 400;
+            font-style: italic;
+        }
+
+        /* 动画定义 */
+        @keyframes whiteOut {
+            0% { background-color: #ffffff; filter: blur(0px); opacity: 1; }
+            20% { background-color: #ffffff; filter: blur(40px); opacity: 1; }
+            40% { background-color: transparent; filter: blur(60px); opacity: 0; }
+            100% { background-color: transparent; filter: blur(60px); opacity: 0; }
+        }
+
+        @keyframes colorFlow {
+            0%, 20% { background-color: #cbd5e1; }
+            40% { background-color: #94a3b8; }
+            60% { background-color: #475569; }
+            80% { background-color: #334155; }
+            100% { background-color: #1e293b; }
+        }
+
+        @keyframes contentSequence {
+            0%, 25% { opacity: 0; filter: blur(20px); transform: scale(0.8); }
+            40%, 80% { opacity: 1; filter: blur(0px); transform: scale(1); }
+            100% { opacity: 0; filter: blur(30px); transform: scale(1.2); }
+        }
+
+        @keyframes islandRotateComplex {
+            0% { transform: perspective(1000px) rotateX(45deg) rotateY(-30deg); }
+            100% { transform: perspective(1000px) rotateX(0deg) rotateY(360deg); }
+        }
+
+        @keyframes jellyFloat {
+            0%, 100% { transform: translateY(0px) rotate(0deg) scale(1); }
+            33% { transform: translateY(-8px) rotate(2deg) scale(1.02); }
+            66% { transform: translateY(6px) rotate(-2deg) scale(0.98); }
+        }
+
+        @keyframes jellyBubble {
+            0%, 100% { transform: translate(0, 0) scale(1) rotate(0deg); }
+            33% { transform: translate(50px, -80px) scale(1.1) rotate(10deg); }
+            66% { transform: translate(-40px, 40px) scale(0.95) rotate(-10deg); }
+        }
+
+        @keyframes kandinskyPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        /* 新增：选择界面模糊渐入动画 */
+        @keyframes blurFadeIn {
+            0% { opacity: 0; filter: blur(25px); transform: scale(1.05); }
+            100% { opacity: 1; filter: blur(0px); transform: scale(1); }
+        }
+
+        .animate-white-out { animation: whiteOut 5.5s ease-in-out forwards; }
+        .animate-intro-bg { animation: colorFlow 5.5s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+        .intro-content-group { animation: contentSequence 5.5s cubic-bezier(0.4, 0, 0.2, 1) forwards; opacity: 0; }
+        .island-3d-motion { animation: islandRotateComplex 5.5s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+        .animate-float-slow { animation: jellyFloat 6s ease-in-out infinite; }
+        .animate-float-delayed { animation: jellyFloat 7.2s ease-in-out infinite 0.8s; }
+        .animate-jelly-bubble { animation: jellyBubble 15s ease-in-out infinite; }
+        
+        /* 模糊渐入应用类 */
+        .animate-blur-fade-in { animation: blurFadeIn 1.5s cubic-bezier(0.2, 0, 0.4, 1) forwards; }
+
+        /* 扩张逻辑 */
+        .jelly-expand { transition: all 1000ms cubic-bezier(0.34, 1.56, 0.64, 1); }
+        .fast-compress { transition: all 600ms cubic-bezier(0.4, 0, 1, 1); }
+
+        .hidden-stage { display: none !important; }
+        .parallax-wrapper { transition: transform 0.1s ease-out; }
+
+        /* 标题放大的过渡效果 */
+        .title-expand { transition: font-size 1000ms cubic-bezier(0.34, 1.56, 0.64, 1), transform 1000ms cubic-bezier(0.34, 1.56, 0.64, 1); }
+        
+        /* 加载动画 */
+        @keyframes pulse-subtle {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.7; }
+        }
+        .animate-pulse-subtle { animation: pulse-subtle 2s ease-in-out infinite; }
+    </style>
+</head>
+<body>
+
+    <div id="app" class="w-full h-screen overflow-hidden bg-zinc-950">
+        
+        <!-- 1. 入场动画阶段 -->
+        <div id="intro-stage" class="relative w-full h-full animate-intro-bg overflow-hidden flex items-center justify-center">
+            <div class="absolute inset-0 z-50 animate-white-out pointer-events-none"></div>
+            <div class="relative flex flex-col items-center justify-center w-full max-w-2xl px-4 text-center">
+                <div class="intro-content-group flex flex-col items-center w-full">
+                    <div class="island-3d-motion relative w-80 h-80 flex items-center justify-center mx-auto">
+                        <svg viewBox="0 0 200 200" class="absolute w-full h-full opacity-30">
+                            <path d="M100 20 L180 60 L180 140 L100 180 L20 140 L20 60 Z" fill="none" stroke="currentColor" stroke-width="0.5" class="text-white" />
+                        </svg>
+                        <div class="relative w-28 h-28 transform-gpu flex items-center justify-center">
+                            <div class="absolute inset-0 bg-white/10 backdrop-blur-lg border border-white/30 rotate-45 shadow-2xl"></div>
+                        </div>
+                    </div>
+                    <div class="mt-12 w-full">
+                        <h1 class="text-xl font-thin uppercase tracking-[1.4em] text-white inline-block pl-[1.4em]">人生岛屿盲盒</h1>
+                        <p class="text-[8px] text-white/40 mt-4 tracking-[0.6em] uppercase font-mono">NEURAL INTERFACE INITIALIZING</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. 选择界面阶段 -->
+        <div id="select-stage" class="hidden-stage relative flex h-full w-full bg-[#1e293b] overflow-hidden">
+            
+            <!-- 左侧：康定斯基区 (去你的岛) -->
+            <div id="kandinsky-panel" class="absolute left-0 top-0 h-full z-10 overflow-hidden group cursor-pointer w-[60%] bg-[#e6e2d3] transition-all duration-1000" style="mask-image: linear-gradient(to right, black 70%, transparent 100%); -webkit-mask-image: linear-gradient(to right, black 70%, transparent 100%);">
+                
+                <!-- 背景艺术元素 (扩张后显示) -->
+                <div id="kandinsky-bg" class="absolute inset-0 opacity-0 pointer-events-none overflow-hidden transition-opacity duration-1000">
+                    <svg width="100%" height="100%" viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid slice">
+                        <circle cx="200" cy="200" r="150" stroke="#222" stroke-width="0.5" fill="none" class="origin-center animate-[kandinskyPulse_8s_ease-in-out_infinite]" />
+                        <circle cx="800" cy="400" r="200" stroke="#e63946" stroke-width="0.3" fill="none" />
+                        <path d="M 0 300 Q 250 100, 500 300 T 1000 300" stroke="#277da1" stroke-width="8" fill="none" opacity="0.4" />
+                        <circle cx="850" cy="150" r="30" fill="#e63946" opacity="0.6" />
+                        <rect x="830" y="100" width="40" height="40" fill="#222" transform="rotate(45 850 120)" opacity="0.8" />
+                        <circle cx="150" cy="450" r="15" fill="#f9c74f" opacity="0.5" />
+                    </svg>
+                </div>
+
+                <div class="parallax-wrapper relative h-full flex flex-col items-center justify-center p-20 transform -translate-x-[8%]">
+                    <div class="flex flex-col items-center group-hover:scale-105 group-hover:brightness-110 transition-all duration-500">
+                        <!-- 康定斯基图标 -->
+                        <div class="mb-8 w-14 h-14 relative scale-110 animate-float-slow">
+                            <div class="absolute top-0 left-0 w-7 h-7 rounded-full bg-red-500 border-[1.5px] border-black z-10"></div>
+                            <div class="absolute bottom-0 right-0 w-0 h-0 border-l-[18px] border-l-transparent border-r-[18px] border-r-transparent border-b-[30px] border-b-yellow-400"></div>
+                            <div class="absolute top-1/2 left-0 w-full h-[1.5px] bg-black rotate-45"></div>
+                            <div class="absolute top-1/4 right-0 w-5 h-5 bg-blue-600 opacity-80"></div>
+                        </div>
+                        <h2 id="kandinsky-title" class="serif-title text-5xl mb-8 text-center leading-none tracking-tight title-expand" style="color: #5e4545;">去你的岛</h2>
+                        <p id="kandinsky-desc" class="text-[11px] mb-10 max-w-[220px] font-normal text-center leading-relaxed tracking-wide" style="color: #7d6666;">
+                            在艺术的韵律中拾取碎片，构筑一座只属于你的，永恒的精神孤岛。
+                        </p>
+                        
+                        <div id="kandinsky-btns">
+                            <button onclick="selectChoice('kandinsky')" class="px-10 py-4 bg-black text-white uppercase text-[9px] tracking-[0.4em] font-bold shadow-md hover:scale-105 transition-transform">选择此风格探索</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右侧：玻璃拟态区 (命运之岛) -->
+            <div id="glass-panel" class="absolute right-0 top-0 h-full z-10 overflow-hidden group cursor-pointer w-[60%] transition-all duration-1000" style="mask-image: linear-gradient(to left, black 75%, transparent 100%); -webkit-mask-image: linear-gradient(to left, black 75%, transparent 100%);">
+                
+                <!-- 背景层 -->
+                <div class="absolute inset-0 bg-[#0f172a]">
+                    <div class="absolute top-[20%] right-[10%] w-[400px] h-[400px] bg-blue-500/10 rounded-full blur-[120px] ambient-blob"></div>
+                    <div class="absolute bottom-[10%] left-[20%] w-[350px] h-[350px] bg-indigo-500/10 rounded-full blur-[100px] ambient-blob" style="animation-delay: -5s;"></div>
+                    
+                    <!-- 动态果冻气泡 (扩张后显示) -->
+                    <div id="glass-bubbles" class="absolute inset-0 pointer-events-none opacity-0 transition-opacity duration-1000">
+                        <div class="absolute top-[15%] left-[10%] w-72 h-72 rounded-full border border-white/20 bg-gradient-to-br from-white/10 to-transparent backdrop-blur-md animate-jelly-bubble shadow-[0_0_40px_rgba(255,255,255,0.05)]"></div>
+                        <div class="absolute bottom-[10%] right-[15%] w-96 h-96 rounded-full border border-white/10 bg-gradient-to-tr from-blue-400/10 to-transparent backdrop-blur-xl animate-jelly-bubble shadow-[0_0_60px_rgba(59,130,246,0.1)]" style="animation-delay: -5s;"></div>
+                        <div class="absolute top-[60%] left-[35%] w-40 h-40 rounded-full border border-white/30 bg-white/5 backdrop-blur-sm animate-jelly-bubble shadow-[0_0_20px_rgba(255,255,255,0.1)]" style="animation-delay: -10s;"></div>
+                    </div>
+                </div>
+
+                <!-- 毛玻璃蒙版层 -->
+                <div id="glass-overlay" class="absolute inset-0 bg-white/[0.03] backdrop-blur-[30px] border-l border-white/10 shadow-[-20px_0_50px_rgba(0,0,0,0.3)] transition-all duration-1000"></div>
+
+                <div class="parallax-wrapper relative h-full flex flex-col items-center justify-center p-20 transform translate-x-[8%]">
+                    <div class="flex flex-col items-center group-hover:scale-105 group-hover:brightness-125 transition-all duration-500">
+                        <!-- 玻璃拟态图标 -->
+                        <div class="mb-8 w-14 h-14 flex items-center justify-center scale-110 animate-float-delayed">
+                            <div class="w-10 h-10 rounded-xl bg-white/10 backdrop-blur-xl border border-white/20 shadow-sm rotate-12"></div>
+                            <div class="absolute w-8 h-8 rounded-full bg-gradient-to-br from-white/30 to-blue-50/10 blur-[1px] -translate-x-1 -translate-y-1 opacity-40"></div>
+                        </div>
+                        <h2 id="glass-title" class="text-5xl font-thin tracking-[0.2em] mb-8 text-slate-100 text-center leading-none title-expand">命运之岛</h2>
+                        <p id="glass-desc" class="text-[11px] text-slate-400 mb-10 max-w-[220px] text-center leading-relaxed tracking-wide">
+                            在艺术的韵律中拾取碎片，构筑一座只属于你的，永恒的精神孤岛。
+                        </p>
+                        
+                        <div id="glass-btns">
+                            <button onclick="selectChoice('glass')" class="px-10 py-4 bg-white/[0.03] backdrop-blur-md border border-white/10 rounded-full text-white/80 uppercase text-[9px] tracking-[0.4em] shadow-lg hover:scale-105 transition-transform">选择此风格探索</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 底部装饰 -->
+            <div id="footer-decor" class="absolute bottom-8 w-full px-12 z-40 flex justify-between items-end opacity-20 pointer-events-none animate-in fade-in duration-1000 transition-opacity">
+                <div class="h-[1.5px] w-20 bg-white/40"></div>
+                <p class="text-[6px] font-mono tracking-[0.5em] uppercase text-white">Authorized // Status: Active Selection</p>
+            </div>
+            
+            <!-- 加载遮罩（新增） -->
+            <div id="loading-mask" class="hidden absolute inset-0 z-50 bg-black/70 backdrop-blur-md flex flex-col items-center justify-center transition-opacity duration-500">
+                <div class="w-16 h-16 border-2 border-white/30 border-t-white rounded-full animate-spin mb-4"></div>
+                <p class="text-white/70 text-xs tracking-widest animate-pulse-subtle">加载中...</p>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const introStage = document.getElementById('intro-stage');
+        const selectStage = document.getElementById('select-stage');
+        const kandinskyPanel = document.getElementById('kandinsky-panel');
+        const glassPanel = document.getElementById('glass-panel');
+        const kandinskyBg = document.getElementById('kandinsky-bg');
+        const kandinskyTitle = document.getElementById('kandinsky-title');
+        const glassBubbles = document.getElementById('glass-bubbles');
+        const glassOverlay = document.getElementById('glass-overlay');
+        const glassTitle = document.getElementById('glass-title');
+        const footerDecor = document.getElementById('footer-decor');
+        const loadingMask = document.getElementById('loading-mask');
+        const parallaxWrappers = document.querySelectorAll('.parallax-wrapper');
+
+        let currentStage = 'intro';
+        let transitioning = null;
+
+        // 1. 入场倒计时
+        setTimeout(() => {
+            introStage.classList.add('hidden-stage');
+            selectStage.classList.remove('hidden-stage');
+            // 触发模糊渐入动画
+            selectStage.classList.add('animate-blur-fade-in');
+            currentStage = 'select';
+            
+            // 预加载资源
+            preloadResources();
+        }, 5500);
+
+        // 预加载函数 - 优化加载体验
+        function preloadResources() {
+            // 预加载两个体验页 - 使用正确的GitHub Pages路径
+            const preloadLinks = document.createElement('link');
+            preloadLinks.rel = 'prefetch';
+            preloadLinks.href = 'qunidedao.html'; // 相对路径
+            document.head.appendChild(preloadLinks);
+            
+            const preloadLinks2 = document.createElement('link');
+            preloadLinks2.rel = 'prefetch';
+            preloadLinks2.href = 'mingyunzhidao.html'; // 相对路径
+            document.head.appendChild(preloadLinks2);
+            
+            console.log('资源预加载已启动');
+        }
+
+        // 2. 鼠标视察效果
+        document.addEventListener('mousemove', (e) => {
+            if (currentStage !== 'select' || transitioning) return;
+
+            const x = (e.clientX / window.innerWidth - 0.5) * 20;
+            const y = (e.clientY / window.innerHeight - 0.5) * 20;
+
+            parallaxWrappers.forEach((wrapper, index) => {
+                const baseOffset = index === 0 ? -8 : 8;
+                wrapper.style.transform = `translate(calc(${baseOffset}% + ${x}px), ${y}px)`;
+            });
+        });
+
+        // 3. 悬停效果逻辑
+        kandinskyPanel.addEventListener('mouseenter', () => {
+            if (transitioning) return;
+            glassPanel.classList.add('opacity-20', 'translate-x-10', 'blur-sm');
+        });
+        kandinskyPanel.addEventListener('mouseleave', () => {
+            if (transitioning) return;
+            glassPanel.classList.remove('opacity-20', 'translate-x-10', 'blur-sm');
+        });
+
+        glassPanel.addEventListener('mouseenter', () => {
+            if (transitioning) return;
+            kandinskyPanel.classList.add('opacity-20', '-translate-x-10', 'blur-sm');
+        });
+        glassPanel.addEventListener('mouseleave', () => {
+            if (transitioning) return;
+            kandinskyPanel.classList.remove('opacity-20', '-translate-x-10', 'blur-sm');
+        });
+
+        // 4. 选择扩张逻辑
+        function selectChoice(choice) {
+            if (transitioning) return;
+            transitioning = choice;
+
+            footerDecor.style.opacity = '0';
+
+            if (choice === 'kandinsky') {
+                // 扩张左侧
+                kandinskyPanel.style.width = '100%';
+                kandinskyPanel.style.zIndex = '50';
+                kandinskyPanel.style.maskImage = 'none';
+                kandinskyPanel.style.webkitMaskImage = 'none';
+                kandinskyPanel.classList.add('jelly-expand');
+                kandinskyPanel.style.backgroundColor = '#f2f0e9';
+
+                // 标题放大
+                kandinskyTitle.classList.remove('text-5xl');
+                kandinskyTitle.style.fontSize = '6rem'; // 8xl 约为 6rem
+
+                // 压缩右侧
+                glassPanel.style.width = '0';
+                glassPanel.style.opacity = '0';
+                glassPanel.classList.add('fast-compress');
+
+                // 对齐内容
+                parallaxWrappers[0].style.transform = 'translate(0, 0)';
+                kandinskyBg.style.opacity = '0.5';
+
+                // 显示加载遮罩并跳转到"去你的岛"
+                document.getElementById('kandinsky-btns').innerHTML = `
+                    <button onclick="goToPage('kandinsky')" class="flex items-center gap-2 px-8 py-3 bg-black text-white text-[9px] tracking-[0.4em] uppercase hover:bg-red-600 transition-all">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                        开始探索
+                    </button>
+                `;
+            } else {
+                // 扩张右侧
+                glassPanel.style.width = '100%';
+                glassPanel.style.zIndex = '50';
+                glassPanel.style.maskImage = 'none';
+                glassPanel.style.webkitMaskImage = 'none';
+                glassPanel.classList.add('jelly-expand');
+                glassPanel.style.backgroundColor = '#0a0f1a';
+                glassOverlay.style.backgroundColor = 'transparent';
+                glassOverlay.style.backdropFilter = 'none';
+
+                // 标题放大
+                glassTitle.classList.remove('text-5xl');
+                glassTitle.style.fontSize = '6rem'; // 8xl 约为 6rem
+
+                // 压缩左侧
+                kandinskyPanel.style.width = '0';
+                kandinskyPanel.style.opacity = '0';
+                kandinskyPanel.classList.add('fast-compress');
+
+                // 对齐内容
+                parallaxWrappers[1].style.transform = 'translate(0, 0)';
+                glassBubbles.style.opacity = '1';
+
+                // 显示加载遮罩并跳转到"命运之岛"
+                document.getElementById('glass-btns').innerHTML = `
+                    <button onclick="goToPage('glass')" class="flex items-center gap-2 px-8 py-3 bg-white/5 backdrop-blur-md border border-white/10 rounded-full text-white/60 text-[9px] tracking-[0.4em] uppercase hover:bg-white/10 transition-all">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                        开始探索
+                    </button>
+                `;
+            }
+        }
+
+        // 5. 统一的页面跳转函数（针对GitHub Pages优化）
+        function goToPage(pageType) {
+            // 显示加载遮罩
+            loadingMask.classList.remove('hidden');
+            loadingMask.classList.add('flex');
+            
+            // 根据页面类型设置不同的目标URL
+            let targetUrl = '';
+            let pageName = '';
+            
+            if (pageType === 'kandinsky') {
+                targetUrl = 'qunidedao.html';
+                pageName = '「去你的岛」';
+            } else if (pageType === 'glass') {
+                targetUrl = 'mingyunzhidao.html';
+                pageName = '「命运之岛」';
+            }
+            
+            // 更新加载文本
+            loadingMask.querySelector('p').textContent = `正在进入${pageName}...`;
+            
+            console.log(`跳转到: ${targetUrl}`);
+            
+            // 延迟跳转以显示加载动画
+            setTimeout(() => {
+                // 先检查页面是否存在
+                fetch(targetUrl, { method: 'HEAD' })
+                    .then(response => {
+                        if (response.ok) {
+                            // 页面存在，进行跳转
+                            window.location.href = targetUrl;
+                        } else {
+                            // 页面不存在，显示错误
+                            loadingMask.querySelector('p').textContent = `找不到 ${targetUrl} 页面，请确保文件已上传到仓库`;
+                            loadingMask.style.background = 'rgba(239, 68, 68, 0.8)';
+                            
+                            // 添加返回按钮
+                            const backBtn = document.createElement('button');
+                            backBtn.textContent = '返回选择';
+                            backBtn.className = 'mt-4 px-4 py-2 bg-white text-black text-xs rounded hover:bg-gray-200 transition-colors';
+                            backBtn.onclick = function() {
+                                loadingMask.classList.add('hidden');
+                                loadingMask.classList.remove('flex');
+                                loadingMask.style.background = '';
+                                loadingMask.querySelector('p').textContent = '加载中...';
+                                if (backBtn.parentNode) {
+                                    backBtn.parentNode.removeChild(backBtn);
+                                }
+                            };
+                            loadingMask.appendChild(backBtn);
+                            
+                            // 3秒后自动隐藏加载遮罩
+                            setTimeout(() => {
+                                loadingMask.classList.add('hidden');
+                                loadingMask.classList.remove('flex');
+                                loadingMask.style.background = '';
+                                if (backBtn.parentNode) {
+                                    backBtn.parentNode.removeChild(backBtn);
+                                }
+                            }, 5000);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('加载失败:', error);
+                        loadingMask.querySelector('p').textContent = '网络错误，请检查连接';
+                        loadingMask.style.background = 'rgba(239, 68, 68, 0.8)';
+                        
+                        // 3秒后隐藏加载遮罩
+                        setTimeout(() => {
+                            loadingMask.classList.add('hidden');
+                            loadingMask.classList.remove('flex');
+                            loadingMask.style.background = '';
+                        }, 3000);
+                    });
+            }, 1000); // 给用户1秒时间看到加载动画
+        }
+    </script>
+</body>
+</html>
