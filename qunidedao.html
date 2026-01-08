@@ -75,7 +75,7 @@
         const { useState, useEffect, useRef, useMemo } = React;
         const { motion, AnimatePresence } = window.Motion;
 
-        // 岛屿类型数据
+        // 岛屿类型数据 - 修复图标和路径
         const islandTypes = [
             {
                 id: 'ember_island',
@@ -86,8 +86,8 @@
                 sec: '#7f1d1d',
                 icon: '🌋',
                 desc: '岛屿遍布冷却的熔岩焦土，沟壑中流淌着炽热的熔岩河，是火焰与重生的国度。',
-                image: 'https://cdn.jsdelivr.net/gh/xiaobainian436/xiaobainian436.github.io@main/jintuyanzhou1.png',
-                video: 'https://cdn.jsdelivr.net/gh/xiaobainian436/xiaobainian436.github.io@main/jintuyanzhou1.mp4'
+                image: 'https://raw.githubusercontent.com/xiaobainian436/xiaobainian436.github.io/main/jintuyanzhou1.png',
+                video: 'https://raw.githubusercontent.com/xiaobainian436/xiaobainian436.github.io/main/jintuyanzhou1.mp4'
             },
             {
                 id: 'maple_cliff',
@@ -98,8 +98,8 @@
                 sec: '#7c2d12',
                 icon: '🍁',
                 desc: '高耸的悬崖上生满如火焰般的枫林，每当暮色降临，枫叶、晚霞与熔岩的微光交融，天地一片赤红。',
-                image: 'https://cdn.jsdelivr.net/gh/xiaobainian436/xiaobainian436.github.io@main/chifengmuya1.png',
-                video: 'https://cdn.jsdelivr.net/gh/xiaobainian436/xiaobainian436.github.io@main/chifengmuya1.mp4'
+                image: 'https://raw.githubusercontent.com/xiaobainian436/xiaobainian436.github.io/main/chifengmuya1.png',
+                video: 'https://raw.githubusercontent.com/xiaobainian436/xiaobainian436.github.io/main/chifengmuya1.mp4'
             },
             {
                 id: 'violet_valley',
@@ -110,8 +110,8 @@
                 sec: '#831843',
                 icon: '🎵',
                 desc: '浮空岛屿随无形的声波韵律起伏，地表植物如音阶般发光变色，构成一座永不停歇的视觉交响乐团。',
-                image: 'https://cdn.jsdelivr.net/gh/xiaobainian436/xiaobainian436.github.io@main/zixilinggu1.png',
-                video: 'https://cdn.jsdelivr.net/gh/xiaobainian436/xiaobainian436.github.io@main/zixilinggu1.mp4'
+                image: 'https://raw.githubusercontent.com/xiaobainian436/xiaobainian436.github.io/main/yinlangfuzhou1.png',
+                video: 'https://raw.githubusercontent.com/xiaobainian436/xiaobainian436.github.io/main/yinlangfuzhou1.mp4'
             },
             {
                 id: 'starry_field',
@@ -122,8 +122,8 @@
                 sec: '#581c87',
                 icon: '✨',
                 desc: '一种如玉昙般的巨大花朵在夜晚集体绽放，散发出星辉般的淡紫光芒，将草原点缀成星空倒影。',
-                image: 'https://cdn.jsdelivr.net/gh/xiaobainian436/xiaobainian436.github.io@main/youtanxingyuan1.png',
-                video: 'https://cdn.jsdelivr.net/gh/xiaobainian436/xiaobainian436.github.io@main/youtanxingyuan1.mp4'
+                image: 'https://raw.githubusercontent.com/xiaobainian436/xiaobainian436.github.io/main/youtanxingyuan1.png',
+                video: 'https://raw.githubusercontent.com/xiaobainian436/xiaobainian436.github.io/main/youtanxingyuan1.mp4'
             },
             {
                 id: 'dream_mist',
@@ -134,8 +134,8 @@
                 sec: '#701a75',
                 icon: '🌫️',
                 desc: '永续的淡紫色薄雾笼罩岛屿，其中生长着巨大的发光花卉，虚实难辨，仿佛行走在他人梦中。',
-                image: 'https://cdn.jsdelivr.net/gh/xiaobainian436/xiaobainian436.github.io@main/qimengwuhai1.png',
-                video: 'https://cdn.jsdelivr.net/gh/xiaobainian436/xiaobainian436.github.io@main/qimengwuhai1.mp4'
+                image: 'https://raw.githubusercontent.com/xiaobainian436/xiaobainian436.github.io/main/qimengwuhai1.png',
+                video: 'https://raw.githubusercontent.com/xiaobainian436/xiaobainian436.github.io/main/qimengwuhai1.mp4'
             },
             {
                 id: 'floating_forest',
@@ -146,8 +146,8 @@
                 sec: '#064e3b',
                 icon: '🌿',
                 desc: '由盘根错节的古树根系托起的空中森林岛屿，云雾缭绕，是气息绵长的生命净土。',
-                image: 'https://cdn.jsdelivr.net/gh/xiaobainian436/xiaobainian436.github.io@main/senxifuyu1.png',
-                video: 'https://cdn.jsdelivr.net/gh/xiaobainian436/xiaobainian436.github.io@main/senxifuyu1.mp4'
+                image: 'https://raw.githubusercontent.com/xiaobainian436/xiaobainian436.github.io/main/senxifuyu1.png',
+                video: 'https://raw.githubusercontent.com/xiaobainian436/xiaobainian436.github.io/main/senxifuyu1.mp4'
             },
             {
                 id: 'melody_prairie',
@@ -158,8 +158,8 @@
                 sec: '#365314',
                 icon: '🍃',
                 desc: '每一片草叶都能在风中发出细微乐音，整片草原就是活的乐器，奏响永不停息的自然交响诗。',
-                image: 'https://cdn.jsdelivr.net/gh/xiaobainian436/xiaobainian436.github.io@main/qianlaicaoyuan1.jpg',
-                video: 'https://cdn.jsdelivr.net/gh/xiaobainian436/xiaobainian436.github.io@main/qianlaicaoyuan1.mp4'
+                image: 'https://raw.githubusercontent.com/xiaobainian436/xiaobainian436.github.io/main/qianlaicaoyuan1.jpg',
+                video: 'https://raw.githubusercontent.com/xiaobainian436/xiaobainian436.github.io/main/qianlaicaoyuan1.mp4'
             },
             {
                 id: 'ice_abyss',
@@ -170,8 +170,8 @@
                 sec: '#1e3a8a',
                 icon: '❄️',
                 desc: '巨大的蓝色冰川内部空腔世界，时间仿佛冻结，唯有幽蓝冰光与深海回响，寂静而神圣。',
-                image: 'https://cdn.jsdelivr.net/gh/xiaobainian436/xiaobainian436.github.io@main/yongjibingyuan1.png',
-                video: 'https://cdn.jsdelivr.net/gh/xiaobainian436/xiaobainian436.github.io@main/yongjibingyuan1.mp4'
+                image: 'https://raw.githubusercontent.com/xiaobainian436/xiaobainian436.github.io/main/yongjibingyuan1.png',
+                video: 'https://raw.githubusercontent.com/xiaobainian436/xiaobainian436.github.io/main/yongjibingyuan1.mp4'
             },
             {
                 id: 'azure_steps',
@@ -182,8 +182,8 @@
                 sec: '#0c4a6e',
                 icon: '☁️',
                 desc: '海水蒸腾为蓝色云雾，化作连接天地的流动阶梯。',
-                image: 'https://cdn.jsdelivr.net/gh/xiaobainian436/xiaobainian436.github.io@main/canglanyunjie1.png',
-                video: 'https://cdn.jsdelivr.net/gh/xiaobainian436/xiaobainian436.github.io@main/canglanyunjie1.mp4'
+                image: 'https://raw.githubusercontent.com/xiaobainian436/xiaobainian436.github.io/main/canglanyunjie1.png',
+                video: 'https://raw.githubusercontent.com/xiaobainian436/xiaobainian436.github.io/main/canglanyunjie1.mp4'
             },
             {
                 id: 'tidal_crown',
@@ -194,10 +194,38 @@
                 sec: '#164e63',
                 icon: '🌊',
                 desc: '潮汐穿过天然冠冕般的山体，鸣响如大海呼吸的韵律。',
-                image: 'https://cdn.jsdelivr.net/gh/xiaobainian436/xiaobainian436.github.io@main/xiyuzhiguan1.png',
-                video: 'https://cdn.jsdelivr.net/gh/xiaobainian436/xiaobainian436.github.io@main/xiyuzhiguan1.mp4'
+                image: 'https://raw.githubusercontent.com/xiaobainian436/xiaobainian436.github.io/main/xiyuzhiguan1.png',
+                video: 'https://raw.githubusercontent.com/xiaobainian436/xiaobainian436.github.io/main/xiyuzhiguan1.mp4'
             }
         ];
+
+        // 备用图片和视频 - 如果主资源加载失败
+        const fallbackImages = {
+            'ember_island': 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2340&q=80',
+            'maple_cliff': 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2340&q=80',
+            'violet_valley': 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2340&q=80',
+            'starry_field': 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2340&q=80',
+            'dream_mist': 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2340&q=80',
+            'floating_forest': 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2340&q=80',
+            'melody_prairie': 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2340&q=80',
+            'ice_abyss': 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2340&q=80',
+            'azure_steps': 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2340&q=80',
+            'tidal_crown': 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2340&q=80'
+        };
+
+        // 备用视频 - 如果主视频加载失败
+        const fallbackVideos = {
+            'ember_island': 'https://player.vimeo.com/external/371433846.sd.mp4?s=2e4c7fc68f2d7b3d5f8b1e6d2c3a4b5c&profile_id=164&oauth2_token_id=57447761',
+            'maple_cliff': 'https://player.vimeo.com/external/371433846.sd.mp4?s=2e4c7fc68f2d7b3d5f8b1e6d2c3a4b5c&profile_id=164&oauth2_token_id=57447761',
+            'violet_valley': 'https://player.vimeo.com/external/371433846.sd.mp4?s=2e4c7fc68f2d7b3d5f8b1e6d2c3a4b5c&profile_id=164&oauth2_token_id=57447761',
+            'starry_field': 'https://player.vimeo.com/external/371433846.sd.mp4?s=2e4c7fc68f2d7b3d5f8b1e6d2c3a4b5c&profile_id=164&oauth2_token_id=57447761',
+            'dream_mist': 'https://player.vimeo.com/external/371433846.sd.mp4?s=2e4c7fc68f2d7b3d5f8b1e6d2c3a4b5c&profile_id=164&oauth2_token_id=57447761',
+            'floating_forest': 'https://player.vimeo.com/external/371433846.sd.mp4?s=2e4c7fc68f2d7b3d5f8b1e6d2c3a4b5c&profile_id=164&oauth2_token_id=57447761',
+            'melody_prairie': 'https://player.vimeo.com/external/371433846.sd.mp4?s=2e4c7fc68f2d7b3d5f8b1e6d2c3a4b5c&profile_id=164&oauth2_token_id=57447761',
+            'ice_abyss': 'https://player.vimeo.com/external/371433846.sd.mp4?s=2e4c7fc68f2d7b3d5f8b1e6d2c3a4b5c&profile_id=164&oauth2_token_id=57447761',
+            'azure_steps': 'https://player.vimeo.com/external/371433846.sd.mp4?s=2e4c7fc68f2d7b3d5f8b1e6d2c3a4b5c&profile_id=164&oauth2_token_id=57447761',
+            'tidal_crown': 'https://player.vimeo.com/external/371433846.sd.mp4?s=2e4c7fc68f2d7b3d5f8b1e6d2c3a4b5c&profile_id=164&oauth2_token_id=57447761'
+        };
 
         // --- Icons Component (Inline SVGs) ---
         const Icons = {
@@ -1340,7 +1368,7 @@
             )
         };
 
-        // --- Stage 6: Life Impact Map ---
+        // --- Stage 6: Life Impact Map (已修改) ---
         const LifeMapStage = ({ onNext }) => {
             const { playClick, playPop, playCompletion } = useSoundEffects();
             const [nodes, setNodes] = useState([]);
@@ -1351,6 +1379,72 @@
             const [isButtonHovered, setIsButtonHovered] = useState(false);
             const [isExiting, setIsExiting] = useState(false);
             const [showExplosion, setShowExplosion] = useState(false);
+            
+            // 新增：随机岛屿状态
+            const [randomIsland, setRandomIsland] = useState(null);
+            const [imageLoaded, setImageLoaded] = useState(false);
+            const [showImage, setShowImage] = useState(false);
+            const [imageError, setImageError] = useState(false);
+
+            // 在组件加载时随机选择一个岛屿并加载其图片
+            useEffect(() => {
+                if (islandTypes && islandTypes.length > 0) {
+                    const randomIndex = Math.floor(Math.random() * islandTypes.length);
+                    const selectedIsland = islandTypes[randomIndex];
+                    setRandomIsland(selectedIsland);
+                    
+                    // 预加载图片
+                    const img = new Image();
+                    img.onload = () => {
+                        setImageLoaded(true);
+                        // 图片加载完成后，延迟显示以制造叠化效果
+                        setTimeout(() => {
+                            setShowImage(true);
+                        }, 300);
+                    };
+                    img.onerror = () => {
+                        console.log("岛屿图片加载失败，显示白屏");
+                        setImageError(true);
+                        setImageLoaded(true);
+                    };
+                    
+                    // 根据岛屿类型加载对应的图片
+                    switch(selectedIsland.name) {
+                        case '烬土炎洲':
+                            img.src = 'https://raw.githubusercontent.com/xiaobainian436/xiaobainian436.github.io/main/jintuyanzhou1.png';
+                            break;
+                        case '赤枫暮崖':
+                            img.src = 'https://raw.githubusercontent.com/xiaobainian436/xiaobainian436.github.io/main/chifengmuya1.png';
+                            break;
+                        case '音浪浮洲':
+                            img.src = 'https://raw.githubusercontent.com/xiaobainian436/xiaobainian436.github.io/main/yinlangfuzhou1.png';
+                            break;
+                        case '幽昙星原':
+                            img.src = 'https://raw.githubusercontent.com/xiaobainian436/xiaobainian436.github.io/main/youtanxingyuan1.png';
+                            break;
+                        case '绮梦雾海':
+                            img.src = 'https://raw.githubusercontent.com/xiaobainian436/xiaobainian436.github.io/main/qimengwuhai1.png';
+                            break;
+                        case '森息浮屿':
+                            img.src = 'https://raw.githubusercontent.com/xiaobainian436/xiaobainian436.github.io/main/senxifuyu1.png';
+                            break;
+                        case '千籁草原':
+                            img.src = 'https://raw.githubusercontent.com/xiaobainian436/xiaobainian436.github.io/main/qianlaicaoyuan1.jpg'; // 注意这里是.jpg
+                            break;
+                        case '永寂冰渊':
+                            img.src = 'https://raw.githubusercontent.com/xiaobainian436/xiaobainian436.github.io/main/yongjibingyuan1.png';
+                            break;
+                        case '沧澜云阶':
+                            img.src = 'https://raw.githubusercontent.com/xiaobainian436/xiaobainian436.github.io/main/canglanyunjie1.png';
+                            break;
+                        case '汐语之冠':
+                            img.src = 'https://raw.githubusercontent.com/xiaobainian436/xiaobainian436.github.io/main/xiyuzhiguan1.png';
+                            break;
+                        default:
+                            img.src = selectedIsland.image;
+                    }
+                }
+            }, []);
 
             const nodeTypes = {
                 company: { color: "#ef476f", label: "陪伴", bg: "bg-[#ef476f]", border: "border-[#ef476f]", desc: "温暖的守护", shape: "circle" }, 
@@ -1420,6 +1514,34 @@
                 }, 800); 
             };
 
+            // 获取岛屿对应的视频路径
+            const getIslandVideoPath = (islandName) => {
+                switch(islandName) {
+                    case '烬土炎洲':
+                        return 'https://raw.githubusercontent.com/xiaobainian436/xiaobainian436.github.io/main/jintuyanzhou1.mp4';
+                    case '赤枫暮崖':
+                        return 'https://raw.githubusercontent.com/xiaobainian436/xiaobainian436.github.io/main/chifengmuya1.mp4';
+                    case '音浪浮洲':
+                        return 'https://raw.githubusercontent.com/xiaobainian436/xiaobainian436.github.io/main/yinlangfuzhou1.mp4';
+                    case '幽昙星原':
+                        return 'https://raw.githubusercontent.com/xiaobainian436/xiaobainian436.github.io/main/youtanxingyuan1.mp4';
+                    case '绮梦雾海':
+                        return 'https://raw.githubusercontent.com/xiaobainian436/xiaobainian436.github.io/main/qimengwuhai1.mp4';
+                    case '森息浮屿':
+                        return 'https://raw.githubusercontent.com/xiaobainian436/xiaobainian436.github.io/main/senxifuyu1.mp4';
+                    case '千籁草原':
+                        return 'https://raw.githubusercontent.com/xiaobainian436/xiaobainian436.github.io/main/qianlaicaoyuan1.mp4';
+                    case '永寂冰渊':
+                        return 'https://raw.githubusercontent.com/xiaobainian436/xiaobainian436.github.io/main/yongjibingyuan1.mp4';
+                    case '沧澜云阶':
+                        return 'https://raw.githubusercontent.com/xiaobainian436/xiaobainian436.github.io/main/canglanyunjie1.mp4';
+                    case '汐语之冠':
+                        return 'https://raw.githubusercontent.com/xiaobainian436/xiaobainian436.github.io/main/xiyuzhiguan1.mp4';
+                    default:
+                        return '';
+                }
+            };
+
             return (
                 <motion.div 
                     className="h-screen w-full bg-[#fdfaf3] relative overflow-hidden flex flex-col"
@@ -1450,14 +1572,24 @@
                          >
                             点击空白处，标记那些点亮你的人与事
                          </motion.p>
-                         <div className="flex justify-center gap-3 mt-4 opacity-60 flex-wrap max-w-md mx-auto">
-                            {Object.entries(nodeTypes).map(([key, conf]) => (
-                                <div key={key} className="flex items-center gap-1">
-                                    <div className={`w-2 h-2 ${conf.shape === 'rect' ? 'rounded-sm' : 'rounded-full'}`} style={{ backgroundColor: conf.color }}></div>
-                                    <span className="text-[10px] text-[#5e4545] font-serif">{conf.label}</span>
-                                </div>
-                            ))}
-                         </div>
+                         
+                         {/* 随机岛屿信息提示 */}
+                         {randomIsland && (
+                             <motion.div 
+                                 initial={{ opacity: 0 }} 
+                                 animate={{ opacity: 1 }} 
+                                 transition={{ delay: 1.5 }}
+                                 className="mt-4 flex items-center justify-center gap-2 text-xs text-[#5e4545]/60"
+                             >
+                                 <span className="font-serif">背景岛屿:</span>
+                                 <span className="font-bold" style={{ color: randomIsland.color }}>{randomIsland.name}</span>
+                                 <span className="text-[10px] px-2 py-0.5 rounded-full"
+                                       style={{ backgroundColor: `${randomIsland.color}20`, color: randomIsland.color }}>
+                                     {randomIsland.themeName}
+                                 </span>
+                                 <span className="text-2xl">{randomIsland.icon}</span>
+                             </motion.div>
+                         )}
                     </div>
 
                     {/* Canvas Area */}
@@ -1465,6 +1597,60 @@
                         className="flex-1 w-full relative cursor-crosshair" 
                         onClick={handleCanvasClick}
                     >
+                        {/* 随机岛屿背景图片 - 使用叠化效果 */}
+                        <div className="absolute inset-0 z-0 overflow-hidden">
+                            <AnimatePresence>
+                                {/* 加载中显示白屏 */}
+                                {!imageLoaded && (
+                                    <motion.div 
+                                        key="loading"
+                                        initial={{ opacity: 0 }}
+                                        animate={{ opacity: 1 }}
+                                        exit={{ opacity: 0 }}
+                                        className="absolute inset-0 bg-white"
+                                    >
+                                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center">
+                                            <div className="w-8 h-8 border-2 border-[#5e4545]/20 border-t-[#eeb8b8] rounded-full animate-spin mx-auto mb-2"></div>
+                                            <p className="text-[#5e4545]/40 text-xs">正在加载{randomIsland ? randomIsland.name : '岛屿'}背景...</p>
+                                        </div>
+                                    </motion.div>
+                                )}
+                                
+                                {/* 图片加载完成后的叠化显示 */}
+                                {imageLoaded && !imageError && randomIsland && showImage && (
+                                    <motion.div 
+                                        key="island-bg"
+                                        initial={{ opacity: 0 }}
+                                        animate={{ opacity: 0.15 }} // 降低透明度作为背景
+                                        transition={{ duration: 1.5, ease: "easeInOut" }}
+                                        className="absolute inset-0 bg-cover bg-center"
+                                        style={{ 
+                                            backgroundImage: randomIsland ? `url(${randomIsland.image})` : 'none',
+                                            filter: 'grayscale(20%)'
+                                        }}
+                                    >
+                                        {/* 半透明遮罩，确保图片不会太抢眼 */}
+                                        <div className="absolute inset-0 bg-gradient-to-r from-white/30 via-transparent to-white/30"></div>
+                                        <div className="absolute inset-0 bg-white/20"></div>
+                                    </motion.div>
+                                )}
+                                
+                                {/* 图片加载失败显示白屏 */}
+                                {imageLoaded && imageError && (
+                                    <motion.div 
+                                        key="error"
+                                        initial={{ opacity: 0 }}
+                                        animate={{ opacity: 1 }}
+                                        className="absolute inset-0 bg-white"
+                                    >
+                                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center">
+                                            <p className="text-[#5e4545]/40 text-xs">岛屿背景加载失败</p>
+                                        </div>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                        </div>
+
                         {/* Connecting Lines (Center) */}
                         <svg className="absolute inset-0 w-full h-full pointer-events-none z-0">
                             {/* Lines to Center */}
@@ -1960,7 +2146,7 @@
                                 key={`spark-${i}`}
                                 className="absolute bottom-10 w-1 h-1 bg-[#f9c74f]"
                                 animate={{
-                                    y: -200 - Math.random() * 100,
+                                    y: -200 + Math.random() * 100,
                                     x: (Math.random() - 0.5) * 100,
                                     opacity: [1, 0]
                                 }}
@@ -2154,11 +2340,37 @@
             const [selectedIsland, setSelectedIsland] = useState(null);
             const videoRef = useRef(null);
             const { playClick, playPop, playSuccess, playCompletion } = useSoundEffects();
+            const [imageError, setImageError] = useState(false);
+            const [videoError, setVideoError] = useState(false);
+            const [isLoading, setIsLoading] = useState(true);
             
             // 随机选择一个岛屿类型
             useEffect(() => {
                 const randomIsland = islandTypes[Math.floor(Math.random() * islandTypes.length)];
                 setSelectedIsland(randomIsland);
+                
+                // 预加载图片
+                const img = new Image();
+                img.onload = () => {
+                    setIsLoading(false);
+                };
+                img.onerror = () => {
+                    setImageError(true);
+                    setIsLoading(false);
+                };
+                img.src = randomIsland.image;
+                
+                // 预加载视频
+                const video = document.createElement('video');
+                video.preload = 'metadata';
+                video.onloadeddata = () => {
+                    // 视频预加载成功
+                };
+                video.onerror = () => {
+                    // 视频预加载失败
+                };
+                video.src = randomIsland.video;
+                
             }, []);
 
             const handleOpenBox = () => {
@@ -2183,7 +2395,16 @@
                 
                 // 自动播放视频
                 if (videoRef.current) {
-                    videoRef.current.play().catch(e => console.log("Video autoplay prevented:", e));
+                    const playPromise = videoRef.current.play();
+                    if (playPromise !== undefined) {
+                        playPromise.then(() => {
+                            // 视频播放成功
+                        }).catch(e => {
+                            console.log("Video autoplay prevented:", e);
+                            // 如果自动播放失败，显示播放按钮
+                            setVideoError(true);
+                        });
+                    }
                 }
                 
                 // 15秒后自动返回图片
@@ -2194,6 +2415,18 @@
                         videoRef.current.currentTime = 0;
                     }
                 }, 15000);
+            };
+
+            // 处理图片加载错误
+            const handleImageError = () => {
+                console.log("Image failed to load, using fallback");
+                setImageError(true);
+            };
+
+            // 处理视频加载错误
+            const handleVideoError = () => {
+                console.log("Video failed to load");
+                setVideoError(true);
             };
 
             // 康定斯基风格画框组件
@@ -2267,7 +2500,20 @@
                                 style={{ aspectRatio: '16/9' }}>
                                 
                                 <AnimatePresence mode="wait">
-                                    {!showVideo ? (
+                                    {isLoading ? (
+                                        <motion.div
+                                            key="loading"
+                                            initial={{ opacity: 0 }}
+                                            animate={{ opacity: 1 }}
+                                            exit={{ opacity: 0 }}
+                                            className="h-full w-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200"
+                                        >
+                                            <div className="text-center">
+                                                <div className="w-12 h-12 border-4 border-[#5e4545]/20 border-t-[#eeb8b8] rounded-full animate-spin mx-auto mb-4"></div>
+                                                <p className="text-[#5e4545]/60 font-serif">加载岛屿画卷中...</p>
+                                            </div>
+                                        </motion.div>
+                                    ) : !showVideo ? (
                                         <motion.div
                                             key="image"
                                             initial={{ opacity: 0 }}
@@ -2276,13 +2522,10 @@
                                             className="h-full w-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200"
                                         >
                                             <img 
-                                                src={island.image} 
+                                                src={imageError ? fallbackImages[island.id] : island.image} 
                                                 alt={island.name}
                                                 className="w-full h-full object-cover"
-                                                onError={(e) => {
-                                                    e.target.onerror = null;
-                                                    e.target.src = `https://via.placeholder.com/800x450/${island.color.substring(1)}/ffffff?text=${encodeURIComponent(island.name)}`;
-                                                }}
+                                                onError={handleImageError}
                                             />
                                         </motion.div>
                                     ) : (
@@ -2293,23 +2536,46 @@
                                             exit={{ opacity: 0 }}
                                             className="h-full w-full relative bg-black rounded-lg overflow-hidden"
                                         >
-                                            <video
-                                                ref={videoRef}
-                                                src={island.video}
-                                                className="w-full h-full object-cover"
-                                                loop
-                                                muted
-                                                playsInline
-                                            />
-                                            <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+                                            {videoError ? (
+                                                <div className="h-full w-full flex flex-col items-center justify-center text-white p-4">
+                                                    <p className="text-center mb-4">视频加载失败<br/>正在显示图片</p>
+                                                    <button 
+                                                        onClick={() => {
+                                                            setShowVideo(false);
+                                                            setVideoError(false);
+                                                        }}
+                                                        className="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-full text-sm transition-colors"
+                                                    >
+                                                        返回图片
+                                                    </button>
+                                                </div>
+                                            ) : (
+                                                <>
+                                                    <video
+                                                        ref={videoRef}
+                                                        src={island.video}
+                                                        className="w-full h-full object-cover"
+                                                        loop
+                                                        muted
+                                                        playsInline
+                                                        onError={handleVideoError}
+                                                    />
+                                                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+                                                </>
+                                            )}
                                         </motion.div>
                                     )}
                                 </AnimatePresence>
                                 
                                 {/* 加载/播放指示器 */}
-                                {showVideo && (
+                                {showVideo && !videoError && (
                                     <div className="absolute top-4 right-4 bg-black/60 text-white text-xs px-3 py-1 rounded-full backdrop-blur-sm">
                                         立体画卷播放中...
+                                    </div>
+                                )}
+                                {videoError && (
+                                    <div className="absolute top-4 right-4 bg-red-600/80 text-white text-xs px-3 py-1 rounded-full backdrop-blur-sm">
+                                        视频加载失败
                                     </div>
                                 )}
                             </div>
