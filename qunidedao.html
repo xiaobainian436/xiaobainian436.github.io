@@ -1357,7 +1357,7 @@
         };
 
         // --- Stage 6: Life Impact Map (已修改) ---
-        const LifeMapStage = ({ onNext }) => {
+        const LifeMapStage = ({ onNext, onPreloadIsland }) => {
             const { playClick, playPop, playCompletion } = useSoundEffects();
             const [nodes, setNodes] = useState([]);
             const [connections, setConnections] = useState([]); 
@@ -1368,38 +1368,8 @@
             const [isExiting, setIsExiting] = useState(false);
             const [showExplosion, setShowExplosion] = useState(false);
             
-            // 新增：随机岛屿状态
-            const [randomIsland, setRandomIsland] = useState(null);
-            const [imageLoaded, setImageLoaded] = useState(false);
-            const [showImage, setShowImage] = useState(false);
-            const [imageError, setImageError] = useState(false);
-
-            // 在组件加载时随机选择一个岛屿并加载其图片
-            useEffect(() => {
-                if (islandTypes && islandTypes.length > 0) {
-                    const randomIndex = Math.floor(Math.random() * islandTypes.length);
-                    const selectedIsland = islandTypes[randomIndex];
-                    setRandomIsland(selectedIsland);
-                    
-                    // 预加载图片
-                    const img = new Image();
-                    img.onload = () => {
-                        setImageLoaded(true);
-                        // 图片加载完成后，延迟显示以制造叠化效果
-                        setTimeout(() => {
-                            setShowImage(true);
-                        }, 300);
-                    };
-                    img.onerror = () => {
-                        console.log("岛屿图片加载失败，显示白屏");
-                        setImageError(true);
-                        setImageLoaded(true);
-                    };
-                    
-                    // 根据岛屿类型加载对应的图片 - 使用镜像路径
-                    img.src = selectedIsland.image;
-                }
-            }, []);
+            // 预加载标志
+            const preloadStarted = useRef(false);
 
             const nodeTypes = {
                 company: { color: "#ef476f", label: "陪伴", bg: "bg-[#ef476f]", border: "border-[#ef476f]", desc: "温暖的守护", shape: "circle" }, 
@@ -1409,6 +1379,14 @@
                 wisdom:   { color: "#9d4edd", label: "智慧", bg: "bg-[#9d4edd]", border: "border-[#9d4edd]", desc: "深刻的洞见", shape: "diamond" }, 
                 joy:      { color: "#fb8500", label: "快乐", bg: "bg-[#fb8500]", border: "border-[#fb8500]", desc: "纯粹的欢笑", shape: "cloud" }  
             };
+
+            // 在组件加载时触发预加载
+            useEffect(() => {
+                if (!preloadStarted.current && onPreloadIsland) {
+                    preloadStarted.current = true;
+                    onPreloadIsland();
+                }
+            }, [onPreloadIsland]);
 
             const handleCanvasClick = (e) => {
                 if (e.target.closest('.interactive-ui') || isExiting) return;
@@ -1499,24 +1477,6 @@
                          >
                             点击空白处，标记那些点亮你的人与事
                          </motion.p>
-                         
-                         {/* 随机岛屿信息提示 */}
-                         {randomIsland && (
-                             <motion.div 
-                                 initial={{ opacity: 0 }} 
-                                 animate={{ opacity: 1 }} 
-                                 transition={{ delay: 1.5 }}
-                                 className="mt-4 flex items-center justify-center gap-2 text-xs text-[#5e4545]/60"
-                             >
-                                 <span className="font-serif">背景岛屿:</span>
-                                 <span className="font-bold" style={{ color: randomIsland.color }}>{randomIsland.name}</span>
-                                 <span className="text-[10px] px-2 py-0.5 rounded-full"
-                                       style={{ backgroundColor: `${randomIsland.color}20`, color: randomIsland.color }}>
-                                     {randomIsland.themeName}
-                                 </span>
-                                 <span className="text-2xl">{randomIsland.icon}</span>
-                             </motion.div>
-                         )}
                     </div>
 
                     {/* Canvas Area */}
@@ -1524,58 +1484,10 @@
                         className="flex-1 w-full relative cursor-crosshair" 
                         onClick={handleCanvasClick}
                     >
-                        {/* 随机岛屿背景图片 - 使用叠化效果 */}
-                        <div className="absolute inset-0 z-0 overflow-hidden">
-                            <AnimatePresence>
-                                {/* 加载中显示白屏 */}
-                                {!imageLoaded && (
-                                    <motion.div 
-                                        key="loading"
-                                        initial={{ opacity: 0 }}
-                                        animate={{ opacity: 1 }}
-                                        exit={{ opacity: 0 }}
-                                        className="absolute inset-0 bg-white"
-                                    >
-                                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center">
-                                            <div className="w-8 h-8 border-2 border-[#5e4545]/20 border-t-[#eeb8b8] rounded-full animate-spin mx-auto mb-2"></div>
-                                            <p className="text-[#5e4545]/40 text-xs">正在加载{randomIsland ? randomIsland.name : '岛屿'}背景...</p>
-                                        </div>
-                                    </motion.div>
-                                )}
-                                
-                                {/* 图片加载完成后的叠化显示 */}
-                                {imageLoaded && !imageError && randomIsland && showImage && (
-                                    <motion.div 
-                                        key="island-bg"
-                                        initial={{ opacity: 0 }}
-                                        animate={{ opacity: 0.15 }} // 降低透明度作为背景
-                                        transition={{ duration: 1.5, ease: "easeInOut" }}
-                                        className="absolute inset-0 bg-cover bg-center"
-                                        style={{ 
-                                            backgroundImage: randomIsland ? `url(${randomIsland.image})` : 'none',
-                                            filter: 'grayscale(20%)'
-                                        }}
-                                    >
-                                        {/* 半透明遮罩，确保图片不会太抢眼 */}
-                                        <div className="absolute inset-0 bg-gradient-to-r from-white/30 via-transparent to-white/30"></div>
-                                        <div className="absolute inset-0 bg-white/20"></div>
-                                    </motion.div>
-                                )}
-                                
-                                {/* 图片加载失败显示白屏 */}
-                                {imageLoaded && imageError && (
-                                    <motion.div 
-                                        key="error"
-                                        initial={{ opacity: 0 }}
-                                        animate={{ opacity: 1 }}
-                                        className="absolute inset-0 bg-white"
-                                    >
-                                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center">
-                                            <p className="text-[#5e4545]/40 text-xs">岛屿背景加载失败</p>
-                                        </div>
-                                    </motion.div>
-                                )}
-                            </AnimatePresence>
+                        {/* 简约背景 */}
+                        <div className="absolute inset-0 z-0 overflow-hidden bg-gradient-to-br from-[#f9f5eb] to-[#f2e9e4]">
+                            {/* 背景纹理 */}
+                            <div className="absolute inset-0 opacity-[0.03] bg-[radial-gradient(circle,#5e4545_1px,transparent_1px)] bg-[size:30px_30px]" />
                         </div>
 
                         {/* Connecting Lines (Center) */}
@@ -2260,45 +2172,24 @@
             );
         };
 
-        // --- UPDATED: Stage 7: Destination (With Art Frame & 3D Video) ---
-        const Destination = ({ userData, onRestart }) => {
+        // --- UPDATED: Stage 7: Destination (With Enhanced Video Loading) ---
+        const Destination = ({ userData, onRestart, finalIsland }) => {
             const [viewState, setViewState] = useState('BOX'); // BOX, OPENING, REVEAL, SUMMARY
             const [showVideo, setShowVideo] = useState(false);
             const [selectedIsland, setSelectedIsland] = useState(null);
+            const [videoState, setVideoState] = useState('idle'); // 'idle', 'loading', 'loaded', 'playing', 'error'
+            const [videoError, setVideoError] = useState(false);
+            const [imageError, setImageError] = useState(false);
+            
             const videoRef = useRef(null);
             const { playClick, playPop, playSuccess, playCompletion } = useSoundEffects();
-            const [imageError, setImageError] = useState(false);
-            const [videoError, setVideoError] = useState(false);
-            const [isLoading, setIsLoading] = useState(true);
             
-            // 随机选择一个岛屿类型
+            // 使用从App传递来的finalIsland
             useEffect(() => {
-                const randomIsland = islandTypes[Math.floor(Math.random() * islandTypes.length)];
-                setSelectedIsland(randomIsland);
-                
-                // 预加载图片
-                const img = new Image();
-                img.onload = () => {
-                    setIsLoading(false);
-                };
-                img.onerror = () => {
-                    setImageError(true);
-                    setIsLoading(false);
-                };
-                img.src = randomIsland.image;
-                
-                // 预加载视频
-                const video = document.createElement('video');
-                video.preload = 'metadata';
-                video.onloadeddata = () => {
-                    // 视频预加载成功
-                };
-                video.onerror = () => {
-                    // 视频预加载失败
-                };
-                video.src = randomIsland.video;
-                
-            }, []);
+                if (finalIsland) {
+                    setSelectedIsland(finalIsland);
+                }
+            }, [finalIsland]);
 
             const handleOpenBox = () => {
                 playPop(); // Initial pop sound
@@ -2316,49 +2207,159 @@
                 setViewState('SUMMARY');
             };
 
-            const handleActivateVideo = () => {
-                playCompletion();
-                setShowVideo(true);
+            // 增强的视频加载函数
+            const handleActivateVideo = async () => {
+                if (!selectedIsland) return;
                 
-                // 自动播放视频
-                if (videoRef.current) {
-                    const playPromise = videoRef.current.play();
-                    if (playPromise !== undefined) {
-                        playPromise.then(() => {
-                            // 视频播放成功
-                        }).catch(e => {
-                            console.log("Video autoplay prevented:", e);
-                            // 如果自动播放失败，显示播放按钮
-                            setVideoError(true);
-                        });
+                // 如果视频已经在播放，则不处理
+                if (videoState === 'playing') return;
+                
+                // 如果是错误状态，尝试重新加载
+                if (videoState === 'error') {
+                    setVideoError(false);
+                    setVideoState('loading');
+                    if (videoRef.current) {
+                        videoRef.current.load();
                     }
+                    return;
                 }
                 
-                // 15秒后自动返回图片
-                setTimeout(() => {
-                    setShowVideo(false);
-                    if (videoRef.current) {
-                        videoRef.current.pause();
-                        videoRef.current.currentTime = 0;
+                // 显示视频容器
+                setShowVideo(true);
+                
+                // 如果视频已经加载完成，直接播放
+                if (videoState === 'loaded') {
+                    playCompletion();
+                    setVideoState('playing');
+                    try {
+                        await videoRef.current.play();
+                    } catch (error) {
+                        console.log("播放失败:", error);
+                        setVideoState('error');
+                        setVideoError(true);
                     }
-                }, 15000);
+                    return;
+                }
+                
+                // 否则开始加载
+                playCompletion();
+                setVideoState('loading');
+                
+                // 确保视频元素存在
+                if (!videoRef.current) {
+                    // 如果没有视频元素，创建新的
+                    const video = document.createElement('video');
+                    video.src = selectedIsland.video;
+                    video.loop = true;
+                    video.muted = true;
+                    video.playsInline = true;
+                    video.preload = 'auto';
+                    
+                    video.oncanplaythrough = () => {
+                        setVideoState('loaded');
+                        setTimeout(() => {
+                            video.play().then(() => {
+                                setVideoState('playing');
+                            }).catch(e => {
+                                console.log("自动播放失败:", e);
+                                setVideoState('loaded'); // 标记为已加载但未播放
+                            });
+                        }, 300);
+                    };
+                    
+                    video.onerror = () => {
+                        console.log("视频加载错误");
+                        setVideoState('error');
+                        setVideoError(true);
+                    };
+                    
+                    videoRef.current = video;
+                    video.load();
+                } else {
+                    // 使用现有的视频元素
+                    const video = videoRef.current;
+                    
+                    // 清除之前的事件监听器
+                    video.oncanplaythrough = null;
+                    video.onerror = null;
+                    
+                    // 设置新的事件监听器
+                    video.oncanplaythrough = () => {
+                        setVideoState('loaded');
+                        setTimeout(() => {
+                            video.play().then(() => {
+                                setVideoState('playing');
+                            }).catch(e => {
+                                console.log("自动播放失败:", e);
+                                setVideoState('loaded');
+                            });
+                        }, 300);
+                    };
+                    
+                    video.onerror = () => {
+                        console.log("视频加载错误");
+                        setVideoState('error');
+                        setVideoError(true);
+                    };
+                    
+                    // 如果视频源不同，重新加载
+                    if (video.src !== selectedIsland.video) {
+                        video.src = selectedIsland.video;
+                    }
+                    
+                    video.preload = 'auto';
+                    video.load();
+                }
             };
 
             // 处理图片加载错误
             const handleImageError = () => {
-                console.log("Image failed to load, using fallback");
+                console.log("图片加载失败，使用备用图片");
                 setImageError(true);
             };
 
             // 处理视频加载错误
             const handleVideoError = () => {
-                console.log("Video failed to load");
+                console.log("视频加载错误");
+                setVideoState('error');
                 setVideoError(true);
+            };
+
+            // 处理视频可以播放的事件
+            const handleVideoCanPlay = () => {
+                setVideoState('loaded');
+            };
+
+            // 处理视频开始播放
+            const handleVideoPlay = () => {
+                setVideoState('playing');
             };
 
             // 康定斯基风格画框组件
             const KandinskyArtFrame = ({ island, onClick }) => {
                 if (!island) return null;
+                
+                // 根据视频状态确定按钮文本
+                const getButtonText = () => {
+                    if (videoError) {
+                        return "加载失败，点击重试";
+                    }
+                    if (videoState === 'loading') {
+                        return "加载中...";
+                    }
+                    if (videoState === 'playing') {
+                        return "立体画卷播放中";
+                    }
+                    if (videoState === 'loaded') {
+                        return "播放立体画卷";
+                    }
+                    return "立体化画卷";
+                };
+
+                // 根据视频状态确定按钮是否禁用
+                const isButtonDisabled = () => {
+                    return videoState === 'loading' || videoState === 'playing';
+                };
                 
                 return (
                     <motion.div 
@@ -2422,25 +2423,12 @@
                                 <div className="absolute bottom-2 right-2 w-6 h-6 border-b-2 border-r-2 border-[#5e4545]/30" />
                             </div>
                             
-                            {/* 图片区域 */}
+                            {/* 图片/视频区域 */}
                             <div className="relative rounded-xl overflow-hidden mb-6 border-4 border-white shadow-inner"
                                 style={{ aspectRatio: '16/9' }}>
                                 
                                 <AnimatePresence mode="wait">
-                                    {isLoading ? (
-                                        <motion.div
-                                            key="loading"
-                                            initial={{ opacity: 0 }}
-                                            animate={{ opacity: 1 }}
-                                            exit={{ opacity: 0 }}
-                                            className="h-full w-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200"
-                                        >
-                                            <div className="text-center">
-                                                <div className="w-12 h-12 border-4 border-[#5e4545]/20 border-t-[#eeb8b8] rounded-full animate-spin mx-auto mb-4"></div>
-                                                <p className="text-[#5e4545]/60 font-serif">加载岛屿画卷中...</p>
-                                            </div>
-                                        </motion.div>
-                                    ) : !showVideo ? (
+                                    {!showVideo ? (
                                         <motion.div
                                             key="image"
                                             initial={{ opacity: 0 }}
@@ -2470,6 +2458,7 @@
                                                         onClick={() => {
                                                             setShowVideo(false);
                                                             setVideoError(false);
+                                                            setVideoState('idle');
                                                         }}
                                                         className="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-full text-sm transition-colors"
                                                     >
@@ -2485,19 +2474,63 @@
                                                         loop
                                                         muted
                                                         playsInline
+                                                        preload="auto"
+                                                        onCanPlayThrough={handleVideoCanPlay}
+                                                        onPlay={handleVideoPlay}
                                                         onError={handleVideoError}
+                                                        onLoadedData={() => {
+                                                            // 确保视频可以播放
+                                                            if (videoRef.current && videoRef.current.readyState >= 3) {
+                                                                setVideoState('loaded');
+                                                            }
+                                                        }}
                                                     />
                                                     <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+                                                    
+                                                    {/* 加载指示器 */}
+                                                    {videoState === 'loading' && (
+                                                        <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+                                                            <div className="text-white text-center">
+                                                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-2"></div>
+                                                                <p className="text-sm">正在加载立体画卷...</p>
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                    
+                                                    {/* 播放按钮（如果已加载但未播放） */}
+                                                    {videoState === 'loaded' && (
+                                                        <div className="absolute inset-0 flex items-center justify-center">
+                                                            <button 
+                                                                onClick={async () => {
+                                                                    try {
+                                                                        await videoRef.current.play();
+                                                                        setVideoState('playing');
+                                                                    } catch (error) {
+                                                                        console.log("播放失败:", error);
+                                                                        setVideoState('error');
+                                                                        setVideoError(true);
+                                                                    }
+                                                                }}
+                                                                className="bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full p-4 transition-colors"
+                                                            >
+                                                                <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
+                                                                    <path d="M8 5v14l11-7z" />
+                                                                </svg>
+                                                            </button>
+                                                        </div>
+                                                    )}
                                                 </>
                                             )}
                                         </motion.div>
                                     )}
                                 </AnimatePresence>
                                 
-                                {/* 加载/播放指示器 */}
+                                {/* 状态指示器 */}
                                 {showVideo && !videoError && (
                                     <div className="absolute top-4 right-4 bg-black/60 text-white text-xs px-3 py-1 rounded-full backdrop-blur-sm">
-                                        立体画卷播放中...
+                                        {videoState === 'loading' ? '加载中...' : 
+                                         videoState === 'playing' ? '立体画卷播放中' : 
+                                         videoState === 'loaded' ? '点击播放' : '立体画卷'}
                                     </div>
                                 )}
                                 {videoError && (
@@ -2531,34 +2564,46 @@
                         {/* "立体化画卷"按钮 */}
                         <motion.button
                             onClick={handleActivateVideo}
-                            className="absolute -bottom-5 left-1/2 -translate-x-1/2 z-20 px-6 py-3 rounded-full font-serif text-sm tracking-widest shadow-lg flex items-center gap-2 transition-all duration-300 hover:shadow-xl"
+                            disabled={isButtonDisabled()}
+                            className="absolute -bottom-5 left-1/2 -translate-x-1/2 z-20 px-6 py-3 rounded-full font-serif text-sm tracking-widest shadow-lg flex items-center gap-2 transition-all duration-300 hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
                             style={{
-                                backgroundColor: island.color,
+                                backgroundColor: videoError ? '#ef4444' : island.color,
                                 color: 'white'
                             }}
-                            whileHover={{ 
+                            whileHover={!isButtonDisabled() ? { 
                                 scale: 1.1,
                                 boxShadow: `0 10px 25px -5px ${island.color}80`
-                            }}
-                            whileTap={{ scale: 0.95 }}
+                            } : {}}
+                            whileTap={!isButtonDisabled() ? { scale: 0.95 } : {}}
                         >
-                            <Icons.Video className="w-4 h-4" />
-                            立体化画卷
+                            {videoState === 'loading' ? (
+                                <>
+                                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                                    {getButtonText()}
+                                </>
+                            ) : (
+                                <>
+                                    <Icons.Video className="w-4 h-4" />
+                                    {getButtonText()}
+                                </>
+                            )}
                         </motion.button>
                         
                         {/* 按钮光晕效果 */}
-                        <motion.div
-                            className="absolute -bottom-8 left-1/2 -translate-x-1/2 w-24 h-8 rounded-full blur-xl opacity-0 group-hover:opacity-60 transition-opacity duration-500"
-                            style={{ backgroundColor: island.color }}
-                            animate={{
-                                scale: [1, 1.2, 1],
-                            }}
-                            transition={{
-                                duration: 2,
-                                repeat: Infinity,
-                                ease: "easeInOut"
-                            }}
-                        />
+                        {!isButtonDisabled() && (
+                            <motion.div
+                                className="absolute -bottom-8 left-1/2 -translate-x-1/2 w-24 h-8 rounded-full blur-xl opacity-0 group-hover:opacity-60 transition-opacity duration-500"
+                                style={{ backgroundColor: island.color }}
+                                animate={{
+                                    scale: [1, 1.2, 1],
+                                }}
+                                transition={{
+                                    duration: 2,
+                                    repeat: Infinity,
+                                    ease: "easeInOut"
+                                }}
+                            />
+                        )}
                     </motion.div>
                 );
             };
@@ -2751,7 +2796,7 @@
                                         transition={{ delay: 1.5 }}
                                         className="text-xs text-[#5e4545]/50 mt-12 tracking-widest uppercase font-bold"
                                     >
-                                        {showVideo ? "立体画卷正在播放，15秒后自动返回..." : "点击画框下的按钮体验立体画卷"}
+                                        {showVideo ? "立体画卷正在加载" : "点击画框下的按钮体验立体画卷"}
                                     </motion.p>
 
                                     <motion.button 
@@ -2836,9 +2881,52 @@
             });
             const [showMap, setShowMap] = useState(false);
             const [mapTargetLevel, setMapTargetLevel] = useState(0);
+            const [finalIsland, setFinalIsland] = useState(null);
+            const preloadComplete = useRef(false);
             
             const { isPlaying, toggleMusic } = useAmbientMusic();
             const { playClick } = useSoundEffects();
+
+            // 预加载岛屿资源
+            const preloadIslandResources = (island) => {
+                if (!island || preloadComplete.current) return;
+                
+                // 预加载图片
+                const img = new Image();
+                img.onload = () => {
+                    console.log(`预加载图片完成: ${island.name}`);
+                };
+                img.onerror = () => {
+                    console.log(`图片预加载失败: ${island.name}`);
+                };
+                img.src = island.image;
+                
+                // 预加载视频
+                const video = document.createElement('video');
+                video.preload = 'metadata';
+                video.onloadeddata = () => {
+                    console.log(`预加载视频完成: ${island.name}`);
+                    preloadComplete.current = true;
+                };
+                video.onerror = () => {
+                    console.log(`视频预加载失败: ${island.name}`);
+                    preloadComplete.current = true;
+                };
+                video.src = island.video;
+            };
+
+            // 在LIFE_MAP阶段开始时确定最终岛屿并开始预加载
+            const handleStartLifeMap = () => {
+                if (!finalIsland) {
+                    const randomIsland = islandTypes[Math.floor(Math.random() * islandTypes.length)];
+                    setFinalIsland(randomIsland);
+                    // 开始预加载
+                    preloadIslandResources(randomIsland);
+                }
+                return () => {
+                    // 清理函数
+                };
+            };
 
             // Updated flow logic with Map Interjection
             const nextStage = () => {
@@ -2902,7 +2990,13 @@
                                 {stage === Stage.RITUAL && <Ritual key="ri" onNext={(ans) => { setUserData(p => ({...p, ritualAnswers: ans})); nextStage(); }} />}
                                 {stage === Stage.QUESTIONNAIRE && <QuestionnaireStage key="qs" onNext={(ans) => { setUserData(p => ({...p, questionnaireAnswers: ans})); nextStage(); }} />}
                                 
-                                {stage === Stage.LIFE_MAP && <LifeMapStage key="lm" onNext={handleLifeMapComplete} />}
+                                {stage === Stage.LIFE_MAP && (
+                                    <LifeMapStage 
+                                        key="lm" 
+                                        onNext={handleLifeMapComplete} 
+                                        onPreloadIsland={handleStartLifeMap}
+                                    />
+                                )}
                                 
                                 {stage === Stage.TRANSITION_NARRATIVE && (
                                     <TransitionToNarrative key="tn" onComplete={() => setStage(Stage.NARRATIVE)} />
@@ -2913,10 +3007,19 @@
                                 {stage === Stage.TRANSITION && (
                                     <SailboatTransition key="tr" onComplete={nextStage} />
                                 )}
-                                {stage === Stage.DESTINATION && <Destination key="de" userData={userData} onRestart={() => { 
-                                    setUserData({ artifacts: [], ritualAnswers: [], questionnaireAnswers: [], lifeMapNodes: [], narrativeChoice: null });
-                                    setStage(Stage.INTRO); 
-                                }} />}
+                                {stage === Stage.DESTINATION && (
+                                    <Destination 
+                                        key="de" 
+                                        userData={userData} 
+                                        finalIsland={finalIsland}
+                                        onRestart={() => { 
+                                            setUserData({ artifacts: [], ritualAnswers: [], questionnaireAnswers: [], lifeMapNodes: [], narrativeChoice: null });
+                                            setFinalIsland(null);
+                                            preloadComplete.current = false;
+                                            setStage(Stage.INTRO); 
+                                        }} 
+                                    />
+                                )}
                             </>
                         )}
                     </AnimatePresence>
