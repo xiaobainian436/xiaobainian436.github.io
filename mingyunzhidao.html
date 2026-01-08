@@ -749,11 +749,10 @@
                 <div class="lg:col-span-7 relative flex flex-col items-center justify-center min-h-[750px]">
                     <div id="visual-frame" class="relative group w-full flex justify-center items-center h-[550px]">
                         <div id="reified-image" class="absolute inset-0 z-20 rounded-full overflow-hidden opacity-0 transition-opacity duration-[2s] border-[12px] border-white shadow-2xl scale-[1.05]"></div>
-                        <div id="island-visual" class="relative z-10 scale-[1.1] animate-float-large transition-all duration-[2.5s]"></div>
+                        <div id="island-visual" class="hidden relative z-10 scale-[1.1] animate-float-large transition-all duration-[2.5s]"></div>
                     </div>
                     <div id="result-controls" class="flex flex-wrap justify-center gap-8 pt-40 z-20">
                         <button onclick="reset()" class="px-14 py-5 border border-black/10 rounded-full text-black/40 hover:text-black transition-all text-[11px] tracking-[0.5em] uppercase font-bold">RESTART</button>
-                        <button id="reify-btn" onclick="reifyStageOne()" class="px-20 py-5 bg-slate-900 text-white rounded-full text-[11px] tracking-[0.5em] uppercase font-bold shadow-2xl hover:scale-110 transition-all">✨ 具象化画卷</button>
                         <button id="stereo-btn" onclick="reifyStageTwo()" class="hidden px-20 py-5 bg-blue-600 text-white rounded-full text-[11px] tracking-[0.5em] uppercase font-bold shadow-2xl hover:scale-110 transition-all">🌀 立体化画卷</button>
                         <button id="cancel-stereo-btn" onclick="reifyStageOne(true)" class="hidden px-20 py-5 border-2 border-slate-900 text-slate-900 rounded-full text-[11px] tracking-[0.5em] uppercase font-bold hover:bg-slate-900 hover:text-white transition-all">🔙 取消立体化</button>
                     </div>
@@ -1143,10 +1142,8 @@
                     const container = document.getElementById('reified-image');
                     container.innerHTML = '';
                     container.classList.add('opacity-0');
-                    document.getElementById('reify-btn').classList.remove('hidden');
                     document.getElementById('stereo-btn').classList.add('hidden');
                     document.getElementById('cancel-stereo-btn').classList.add('hidden');
-                    document.getElementById('island-visual').style.opacity = 1;
                     if(topologyLoopId) cancelAnimationFrame(topologyLoopId);
                     if(altarLoopId) { cancelAnimationFrame(altarLoopId); altarLoopId = null; }
                 } 
@@ -1615,7 +1612,9 @@
             document.getElementById('island-desc').innerText = isl.desc;
             document.getElementById('island-coord').innerText = `${Math.floor(Math.random()*180)}°E, ${Math.floor(Math.random()*90)}°N`;
             document.getElementById('island-spirit').innerText = ['活跃', '静谧', '狂博', '复苏'][Math.floor(Math.random()*4)];
-            renderIslandSVG(isl);
+            
+            // 自动加载具象化图片，跳过手动点击步骤
+            reifyStageOne();
             
             // 填充总结内容
             const tokenList = userData.tokenFiles.filter(f => f).map(f => f.name);
@@ -1646,23 +1645,33 @@
             document.getElementById('summary-insight').innerText = insightMap[isl.theme] || '命运的画卷已然展开，每一次选择都化作了此岸。';
         }
 
-        function renderIslandSVG(isl) {
-            const vis = document.getElementById('island-visual'); vis.style.opacity = 1;
-            vis.innerHTML = `<svg viewBox="0 0 240 240" class="w-[480px] h-[480px] drop-shadow-[0_80px_120px_rgba(0,0,0,0.2)]"><defs><linearGradient id="g-base" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" style="stop-color: ${isl.color}" /><stop offset="100%" style="stop-color: ${isl.sec}" /></linearGradient></defs><path d="M40,160 Q120,205 200,160 L180,215 Q120,240 60,215 Z" fill="url(#g-base)" /><ellipse cx="120" cy="160" rx="90" ry="12" fill="${isl.color}" fill-opacity="0.9" /><g><path d="M80,160 L120,50 L160,160 Z" fill="${isl.color}" fill-opacity="0.6" /><path d="M120,160 L155,20 L195,160 Z" fill="${isl.color}" fill-opacity="0.3" /></g><text x="120" y="100" font-size="65" text-anchor="middle" dominant-baseline="middle">${isl.icon}</text></svg>`;
-        }
-
         async function reifyStageOne(isCancel = false) {
-            const reifyBtn = document.getElementById('reify-btn'), stereoBtn = document.getElementById('stereo-btn'), cancelBtn = document.getElementById('cancel-stereo-btn'), isl = userData.targetIsland || islandTypes[0], container = document.getElementById('reified-image');
-            if(!isCancel) { playClick(); reifyBtn.innerText = "✨ 正在感知画卷..."; } 
-            else { 
-                playClick(); const video = container.querySelector('video');
-                if(video) { video.pause(); video.oncanplaythrough = null; video.onerror = null; video.src = ""; video.load(); video.style.opacity = "0"; }
+            const stereoBtn = document.getElementById('stereo-btn'), cancelBtn = document.getElementById('cancel-stereo-btn'), isl = userData.targetIsland || islandTypes[0], container = document.getElementById('reified-image');
+            
+            if(isCancel) { 
+                playClick(); 
+                const video = container.querySelector('video');
+                if(video) { video.pause(); video.style.opacity = "0"; }
             }
-            setTimeout(() => {
-                let img = container.querySelector('img'); if(!img) { img = document.createElement('img'); img.className = "media-layer opacity-0"; img.src = isl.image; container.appendChild(img); }
-                const showImage = () => { document.getElementById('island-visual').style.opacity = 0; container.classList.remove('opacity-0'); img.style.opacity = "1"; reifyBtn.classList.add('hidden'); stereoBtn.classList.remove('hidden'); stereoBtn.innerText = "🌀 立体化画卷"; stereoBtn.style.opacity = "1"; stereoBtn.style.pointerEvents = "auto"; cancelBtn.classList.add('hidden'); };
-                if(img.complete) showImage(); else img.onload = showImage;
-            }, isCancel ? 0 : 1500);
+
+            let img = container.querySelector('img'); 
+            if(!img) { 
+                img = document.createElement('img'); 
+                img.className = "media-layer opacity-0"; 
+                img.src = isl.image; 
+                container.appendChild(img); 
+            }
+            
+            const showImage = () => { 
+                container.classList.remove('opacity-0'); 
+                img.style.opacity = "1"; 
+                stereoBtn.classList.remove('hidden'); 
+                stereoBtn.style.opacity = "1"; 
+                stereoBtn.style.pointerEvents = "auto"; 
+                cancelBtn.classList.add('hidden'); 
+            };
+            
+            if(img.complete) showImage(); else img.onload = showImage;
         }
 
         async function reifyStageTwo() {
