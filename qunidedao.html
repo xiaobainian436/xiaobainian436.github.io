@@ -75,7 +75,7 @@
         const { useState, useEffect, useRef, useMemo } = React;
         const { motion, AnimatePresence } = window.Motion;
 
-        // 岛屿类型数据 - 修复图标和路径
+        // 岛屿类型数据 - 使用 jsdelivr 镜像路径
         const islandTypes = [
             {
                 id: 'ember_island',
@@ -86,8 +86,8 @@
                 sec: '#7f1d1d',
                 icon: '🌋',
                 desc: '岛屿遍布冷却的熔岩焦土，沟壑中流淌着炽热的熔岩河，是火焰与重生的国度。',
-                image: 'https://raw.githubusercontent.com/xiaobainian436/xiaobainian436.github.io/main/jintuyanzhou1.png',
-                video: 'https://raw.githubusercontent.com/xiaobainian436/xiaobainian436.github.io/main/jintuyanzhou1.mp4'
+                image: 'https://cdn.jsdelivr.net/gh/xiaobainian436/xiaobainian436.github.io@main/jintuyanzhou1.png',
+                video: 'https://cdn.jsdelivr.net/gh/xiaobainian436/xiaobainian436.github.io@main/jintuyanzhou1.mp4'
             },
             {
                 id: 'maple_cliff',
@@ -98,8 +98,8 @@
                 sec: '#7c2d12',
                 icon: '🍁',
                 desc: '高耸的悬崖上生满如火焰般的枫林，每当暮色降临，枫叶、晚霞与熔岩的微光交融，天地一片赤红。',
-                image: 'https://raw.githubusercontent.com/xiaobainian436/xiaobainian436.github.io/main/chifengmuya1.png',
-                video: 'https://raw.githubusercontent.com/xiaobainian436/xiaobainian436.github.io/main/chifengmuya1.mp4'
+                image: 'https://cdn.jsdelivr.net/gh/xiaobainian436/xiaobainian436.github.io@main/chifengmuya1.png',
+                video: 'https://cdn.jsdelivr.net/gh/xiaobainian436/xiaobainian436.github.io@main/chifengmuya1.mp4'
             },
             {
                 id: 'violet_valley',
@@ -110,8 +110,8 @@
                 sec: '#831843',
                 icon: '🎵',
                 desc: '浮空岛屿随无形的声波韵律起伏，地表植物如音阶般发光变色，构成一座永不停歇的视觉交响乐团。',
-                image: 'https://raw.githubusercontent.com/xiaobainian436/xiaobainian436.github.io/main/yinlangfuzhou1.png',
-                video: 'https://raw.githubusercontent.com/xiaobainian436/xiaobainian436.github.io/main/yinlangfuzhou1.mp4'
+                image: 'https://cdn.jsdelivr.net/gh/xiaobainian436/xiaobainian436.github.io@main/yinlangfuzhou1.png',
+                video: 'https://cdn.jsdelivr.net/gh/xiaobainian436/xiaobainian436.github.io@main/yinlangfuzhou1.mp4'
             },
             {
                 id: 'starry_field',
@@ -122,8 +122,8 @@
                 sec: '#581c87',
                 icon: '✨',
                 desc: '一种如玉昙般的巨大花朵在夜晚集体绽放，散发出星辉般的淡紫光芒，将草原点缀成星空倒影。',
-                image: 'https://raw.githubusercontent.com/xiaobainian436/xiaobainian436.github.io/main/youtanxingyuan1.png',
-                video: 'https://raw.githubusercontent.com/xiaobainian436/xiaobainian436.github.io/main/youtanxingyuan1.mp4'
+                image: 'https://cdn.jsdelivr.net/gh/xiaobainian436/xiaobainian436.github.io@main/youtanxingyuan1.png',
+                video: 'https://cdn.jsdelivr.net/gh/xiaobainian436/xiaobainian436.github.io@main/youtanxingyuan1.mp4'
             },
             {
                 id: 'dream_mist',
@@ -134,8 +134,8 @@
                 sec: '#701a75',
                 icon: '🌫️',
                 desc: '永续的淡紫色薄雾笼罩岛屿，其中生长着巨大的发光花卉，虚实难辨，仿佛行走在他人梦中。',
-                image: 'https://raw.githubusercontent.com/xiaobainian436/xiaobainian436.github.io/main/qimengwuhai1.png',
-                video: 'https://raw.githubusercontent.com/xiaobainian436/xiaobainian436.github.io/main/qimengwuhai1.mp4'
+                image: 'https://cdn.jsdelivr.net/gh/xiaobainian436/xiaobainian436.github.io@main/qimengwuhai1.png',
+                video: 'https://cdn.jsdelivr.net/gh/xiaobainian436/xiaobainian436.github.io@main/qimengwuhai1.mp4'
             },
             {
                 id: 'floating_forest',
@@ -146,8 +146,8 @@
                 sec: '#064e3b',
                 icon: '🌿',
                 desc: '由盘根错节的古树根系托起的空中森林岛屿，云雾缭绕，是气息绵长的生命净土。',
-                image: 'https://raw.githubusercontent.com/xiaobainian436/xiaobainian436.github.io/main/senxifuyu1.png',
-                video: 'https://raw.githubusercontent.com/xiaobainian436/xiaobainian436.github.io/main/senxifuyu1.mp4'
+                image: 'https://cdn.jsdelivr.net/gh/xiaobainian436/xiaobainian436.github.io@main/senxifuyu1.png',
+                video: 'https://cdn.jsdelivr.net/gh/xiaobainian436/xiaobainian436.github.io@main/senxifuyu1.mp4'
             },
             {
                 id: 'melody_prairie',
@@ -158,8 +158,8 @@
                 sec: '#365314',
                 icon: '🍃',
                 desc: '每一片草叶都能在风中发出细微乐音，整片草原就是活的乐器，奏响永不停息的自然交响诗。',
-                image: 'https://raw.githubusercontent.com/xiaobainian436/xiaobainian436.github.io/main/qianlaicaoyuan1.jpg',
-                video: 'https://raw.githubusercontent.com/xiaobainian436/xiaobainian436.github.io/main/qianlaicaoyuan1.mp4'
+                image: 'https://cdn.jsdelivr.net/gh/xiaobainian436/xiaobainian436.github.io@main/qianlaicaoyuan1.jpg',
+                video: 'https://cdn.jsdelivr.net/gh/xiaobainian436/xiaobainian436.github.io@main/qianlaicaoyuan1.mp4'
             },
             {
                 id: 'ice_abyss',
@@ -170,8 +170,8 @@
                 sec: '#1e3a8a',
                 icon: '❄️',
                 desc: '巨大的蓝色冰川内部空腔世界，时间仿佛冻结，唯有幽蓝冰光与深海回响，寂静而神圣。',
-                image: 'https://raw.githubusercontent.com/xiaobainian436/xiaobainian436.github.io/main/yongjibingyuan1.png',
-                video: 'https://raw.githubusercontent.com/xiaobainian436/xiaobainian436.github.io/main/yongjibingyuan1.mp4'
+                image: 'https://cdn.jsdelivr.net/gh/xiaobainian436/xiaobainian436.github.io@main/yongjibingyuan1.png',
+                video: 'https://cdn.jsdelivr.net/gh/xiaobainian436/xiaobainian436.github.io@main/yongjibingyuan1.mp4'
             },
             {
                 id: 'azure_steps',
@@ -182,8 +182,8 @@
                 sec: '#0c4a6e',
                 icon: '☁️',
                 desc: '海水蒸腾为蓝色云雾，化作连接天地的流动阶梯。',
-                image: 'https://raw.githubusercontent.com/xiaobainian436/xiaobainian436.github.io/main/canglanyunjie1.png',
-                video: 'https://raw.githubusercontent.com/xiaobainian436/xiaobainian436.github.io/main/canglanyunjie1.mp4'
+                image: 'https://cdn.jsdelivr.net/gh/xiaobainian436/xiaobainian436.github.io@main/canglanyunjie1.png',
+                video: 'https://cdn.jsdelivr.net/gh/xiaobainian436/xiaobainian436.github.io@main/canglanyunjie1.mp4'
             },
             {
                 id: 'tidal_crown',
@@ -194,8 +194,8 @@
                 sec: '#164e63',
                 icon: '🌊',
                 desc: '潮汐穿过天然冠冕般的山体，鸣响如大海呼吸的韵律。',
-                image: 'https://raw.githubusercontent.com/xiaobainian436/xiaobainian436.github.io/main/xiyuzhiguan1.png',
-                video: 'https://raw.githubusercontent.com/xiaobainian436/xiaobainian436.github.io/main/xiyuzhiguan1.mp4'
+                image: 'https://cdn.jsdelivr.net/gh/xiaobainian436/xiaobainian436.github.io@main/xiyuzhiguan1.png',
+                video: 'https://cdn.jsdelivr.net/gh/xiaobainian436/xiaobainian436.github.io@main/xiyuzhiguan1.mp4'
             }
         ];
 
@@ -1408,41 +1408,8 @@
                         setImageLoaded(true);
                     };
                     
-                    // 根据岛屿类型加载对应的图片
-                    switch(selectedIsland.name) {
-                        case '烬土炎洲':
-                            img.src = 'https://raw.githubusercontent.com/xiaobainian436/xiaobainian436.github.io/main/jintuyanzhou1.png';
-                            break;
-                        case '赤枫暮崖':
-                            img.src = 'https://raw.githubusercontent.com/xiaobainian436/xiaobainian436.github.io/main/chifengmuya1.png';
-                            break;
-                        case '音浪浮洲':
-                            img.src = 'https://raw.githubusercontent.com/xiaobainian436/xiaobainian436.github.io/main/yinlangfuzhou1.png';
-                            break;
-                        case '幽昙星原':
-                            img.src = 'https://raw.githubusercontent.com/xiaobainian436/xiaobainian436.github.io/main/youtanxingyuan1.png';
-                            break;
-                        case '绮梦雾海':
-                            img.src = 'https://raw.githubusercontent.com/xiaobainian436/xiaobainian436.github.io/main/qimengwuhai1.png';
-                            break;
-                        case '森息浮屿':
-                            img.src = 'https://raw.githubusercontent.com/xiaobainian436/xiaobainian436.github.io/main/senxifuyu1.png';
-                            break;
-                        case '千籁草原':
-                            img.src = 'https://raw.githubusercontent.com/xiaobainian436/xiaobainian436.github.io/main/qianlaicaoyuan1.jpg'; // 注意这里是.jpg
-                            break;
-                        case '永寂冰渊':
-                            img.src = 'https://raw.githubusercontent.com/xiaobainian436/xiaobainian436.github.io/main/yongjibingyuan1.png';
-                            break;
-                        case '沧澜云阶':
-                            img.src = 'https://raw.githubusercontent.com/xiaobainian436/xiaobainian436.github.io/main/canglanyunjie1.png';
-                            break;
-                        case '汐语之冠':
-                            img.src = 'https://raw.githubusercontent.com/xiaobainian436/xiaobainian436.github.io/main/xiyuzhiguan1.png';
-                            break;
-                        default:
-                            img.src = selectedIsland.image;
-                    }
+                    // 根据岛屿类型加载对应的图片 - 使用镜像路径
+                    img.src = selectedIsland.image;
                 }
             }, []);
 
@@ -1512,34 +1479,6 @@
                         onNext(nodes);
                     }, 2000);
                 }, 800); 
-            };
-
-            // 获取岛屿对应的视频路径
-            const getIslandVideoPath = (islandName) => {
-                switch(islandName) {
-                    case '烬土炎洲':
-                        return 'https://raw.githubusercontent.com/xiaobainian436/xiaobainian436.github.io/main/jintuyanzhou1.mp4';
-                    case '赤枫暮崖':
-                        return 'https://raw.githubusercontent.com/xiaobainian436/xiaobainian436.github.io/main/chifengmuya1.mp4';
-                    case '音浪浮洲':
-                        return 'https://raw.githubusercontent.com/xiaobainian436/xiaobainian436.github.io/main/yinlangfuzhou1.mp4';
-                    case '幽昙星原':
-                        return 'https://raw.githubusercontent.com/xiaobainian436/xiaobainian436.github.io/main/youtanxingyuan1.mp4';
-                    case '绮梦雾海':
-                        return 'https://raw.githubusercontent.com/xiaobainian436/xiaobainian436.github.io/main/qimengwuhai1.mp4';
-                    case '森息浮屿':
-                        return 'https://raw.githubusercontent.com/xiaobainian436/xiaobainian436.github.io/main/senxifuyu1.mp4';
-                    case '千籁草原':
-                        return 'https://raw.githubusercontent.com/xiaobainian436/xiaobainian436.github.io/main/qianlaicaoyuan1.mp4';
-                    case '永寂冰渊':
-                        return 'https://raw.githubusercontent.com/xiaobainian436/xiaobainian436.github.io/main/yongjibingyuan1.mp4';
-                    case '沧澜云阶':
-                        return 'https://raw.githubusercontent.com/xiaobainian436/xiaobainian436.github.io/main/canglanyunjie1.mp4';
-                    case '汐语之冠':
-                        return 'https://raw.githubusercontent.com/xiaobainian436/xiaobainian436.github.io/main/xiyuzhiguan1.mp4';
-                    default:
-                        return '';
-                }
             };
 
             return (
@@ -2918,16 +2857,6 @@
                 const idx = STAGE_FLOW.indexOf(stage);
                 if (idx !== -1 && idx < STAGE_FLOW.length - 1) {
                     
-                    // Determine if we need to show map transition BEFORE moving to next stage
-                    // Logic: After finishing a 'Level', we show map moving TO the next 'Level'
-                    
-                    // Levels that trigger map after completion:
-                    // 1. Intro -> (Map to Artifacts) -> Artifacts
-                    // 2. Artifacts -> (Map to Ritual) -> Ritual
-                    // 3. Ritual -> (Map to Questionnaire) -> Questionnaire
-                    // 4. Questionnaire -> (Map to LifeMap) -> LifeMap
-                    // 5. LifeMap -> (Map to Narrative) -> Narrative 
-                    
                     let shouldShowMap = false;
                     let targetLevelIndex = 0;
 
@@ -2937,14 +2866,10 @@
                     else if (stage === Stage.QUESTIONNAIRE) { shouldShowMap = true; targetLevelIndex = 3; }
                     else if (stage === Stage.LIFE_MAP) { shouldShowMap = true; targetLevelIndex = 4; } // Moves to Narrative
                     
-                    // Note: Narrative -> Transition -> Destination doesn't use this map style (it has SailboatTransition)
-
                     if (shouldShowMap) {
                         setMapTargetLevel(targetLevelIndex);
                         setShowMap(true);
-                        // We do NOT increment stage yet. MapTransition will call handleMapComplete
                     } else {
-                        // Normal transition for other stages (like Narrative -> Transition)
                         if (stage === Stage.INTRO && !isPlaying) {
                             toggleMusic();
                         }
@@ -2959,21 +2884,11 @@
                 if (stage === Stage.INTRO && !isPlaying) {
                      toggleMusic();
                 }
-                
-                // Special handling for LifeMap -> Transition Narrative (which is next in list)
-                if (stage === Stage.LIFE_MAP) {
-                     // The next stage in list is TRANSITION_NARRATIVE
-                     // Logic handled in handleLifeMapComplete wrapper usually, but here we unify
-                }
-
                 setStage(STAGE_FLOW[idx + 1]);
             };
 
-            // Custom transition handler from LifeMap to Narrative Transition (Compatible with Map logic)
-            // The LifeMap component calls onNext, which calls handleLifeMapComplete
             const handleLifeMapComplete = (nodes) => {
                 setUserData(p => ({...p, lifeMapNodes: nodes}));
-                // Instead of setting stage directly, we trigger nextStage() which handles the map logic
                 nextStage(); 
             };
 
