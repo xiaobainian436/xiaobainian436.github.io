@@ -1652,6 +1652,11 @@
                 playClick(); 
                 const video = container.querySelector('video');
                 if(video) { video.pause(); video.style.opacity = "0"; }
+                
+                // 恢复背景音乐音量
+                if (melodyGain && !musicMuted) {
+                    melodyGain.gain.linearRampToValueAtTime(0.75, audioCtx.currentTime + 1);
+                }
             }
 
             let img = container.querySelector('img'); 
@@ -1675,14 +1680,66 @@
         }
 
         async function reifyStageTwo() {
-            playClick(); const stereoBtn = document.getElementById('stereo-btn'), cancelBtn = document.getElementById('cancel-stereo-btn'), isl = userData.targetIsland || islandTypes[0], container = document.getElementById('reified-image');
-            stereoBtn.innerText = "🌀 缓存中..."; stereoBtn.style.opacity = "0.7"; stereoBtn.style.pointerEvents = "none"; 
+            playClick(); 
+            const stereoBtn = document.getElementById('stereo-btn'), 
+                  cancelBtn = document.getElementById('cancel-stereo-btn'), 
+                  isl = userData.targetIsland || islandTypes[0], 
+                  container = document.getElementById('reified-image');
+            
+            // 降低合成器背景音乐音量，为视频音轨让路
+            if (melodyGain && !musicMuted) {
+                melodyGain.gain.linearRampToValueAtTime(0.1, audioCtx.currentTime + 1.2);
+            }
+
+            stereoBtn.innerText = "🌀 缓存中..."; 
+            stereoBtn.style.opacity = "0.7"; 
+            stereoBtn.style.pointerEvents = "none"; 
+
             setTimeout(() => {
                 let video = container.querySelector('video');
-                if(!video) { video = document.createElement('video'); video.className = "media-layer opacity-0"; video.loop = true; video.muted = false; video.volume = 1.0; video.playsInline = true; video.preload = "auto"; video.style.background = "rgba(0,0,0,0.05)"; container.appendChild(video); }
-                video.oncanplaythrough = () => { video.currentTime = 0; video.style.opacity = "1"; const img = container.querySelector('img'); if(img) img.style.opacity = "0"; const playPromise = video.play(); if (playPromise !== undefined) { playPromise.catch(e => { video.muted = true; video.play(); }); } stereoBtn.classList.add('hidden'); stereoBtn.innerText = "🌀 立体化画卷"; stereoBtn.style.opacity = "1"; stereoBtn.style.pointerEvents = "auto"; cancelBtn.classList.remove('hidden'); };
-                video.onerror = (e) => { stereoBtn.innerText = "❌ 加载失败"; stereoBtn.style.opacity = "1"; stereoBtn.style.pointerEvents = "auto"; showError(`视频加载失败，请检查网络或文件: ${isl.name}`); };
-                video.src = isl.video; video.load();
+                if(!video) { 
+                    video = document.createElement('video'); 
+                    video.className = "media-layer opacity-0"; 
+                    video.loop = true; 
+                    video.playsInline = true; 
+                    video.preload = "auto"; 
+                    video.style.background = "rgba(0,0,0,0.05)"; 
+                    container.appendChild(video); 
+                }
+                
+                // 确保视频不静音且音量打开
+                video.muted = false;
+                video.volume = 1.0;
+
+                video.oncanplaythrough = () => { 
+                    video.currentTime = 0; 
+                    video.style.opacity = "1"; 
+                    const img = container.querySelector('img'); 
+                    if(img) img.style.opacity = "0"; 
+                    
+                    const playPromise = video.play(); 
+                    if (playPromise !== undefined) { 
+                        playPromise.catch(e => { 
+                            // 即使播放失败，也不回退到静音，而是让用户再次点击触发
+                            console.warn("Video playback requires manual trigger:", e);
+                            video.muted = false;
+                            video.play();
+                        }); 
+                    } 
+                    stereoBtn.classList.add('hidden'); 
+                    stereoBtn.innerText = "🌀 立体化画卷"; 
+                    stereoBtn.style.opacity = "1"; 
+                    stereoBtn.style.pointerEvents = "auto"; 
+                    cancelBtn.classList.remove('hidden'); 
+                };
+                video.onerror = (e) => { 
+                    stereoBtn.innerText = "❌ 加载失败"; 
+                    stereoBtn.style.opacity = "1"; 
+                    stereoBtn.style.pointerEvents = "auto"; 
+                    showError(`视频加载失败: ${isl.name}`); 
+                };
+                video.src = isl.video; 
+                video.load();
             }, 300);
         }
 
